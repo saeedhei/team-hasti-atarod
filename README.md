@@ -56,6 +56,18 @@ Run development:
 pnpm dev
 ```
 
+## :books: Documentation
+
+<details>
+   <summary>pnpm</summary>
+   - [install] (https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/pnpm/install.md)
+</details>
+
+- next
+- git
+- docker
+- couchdb
+
 ## :handshake: Contribution Workflow (VERY IMPORTANT)
 
 1. Create a feature branch:
@@ -67,9 +79,3 @@ pnpm dev
    `git merge upstream/main`
    `git push origin feature-branch`
 4. Open Pull Request
-
-## :memo: Next.js Setup Docs
-
-All Next.js-related installation and setup notes are inside:
-
-` docs/next/`
