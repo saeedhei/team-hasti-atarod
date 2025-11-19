@@ -12,7 +12,7 @@ This tool helps teams manage tasks by columns, track workflow, and improve produ
 - Dark/Light mode
 - Real-time updates (later)
 
-## Tech Stack
+## :hammer_and_wrench: Tech Stack
 
 ```
 - Next.js 16.0.3 (App Router)
@@ -24,14 +24,14 @@ This tool helps teams manage tasks by columns, track workflow, and improve produ
 - GraphQL (Apollo)
 ```
 
-## Project Structure
+## :file_folder: Project Structure
 
 - /app → Main Next.js application (App Router)
 - /docs → Project documentation (setup files, guides)
 - /lib → Utilities, configurations, and shared functions
 - /public → Static assets (images, icons)
 
-## Getting Started
+## :rocket: Getting Started
 
 Clone the repo:
 
@@ -51,7 +51,7 @@ Run development:
 pnpm dev
 ```
 
-## Contribution Workflow (VERY IMPORTANT)
+## :handshake: Contribution Workflow (VERY IMPORTANT)
 
 1. Create a feature branch:
    `git checkout -b feature-branch`
@@ -63,9 +63,9 @@ pnpm dev
    `git push origin feature-branch`
 4. Open Pull Request
 
-## Next.js Setup Docs
+## :memo: Next.js Setup Docs
 
 All Next.js-related installation and setup notes are inside:
 docs/next/
 
-## Roadmap
+## :world_map: Roadmap
