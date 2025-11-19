@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Team Kanban Board
+
+A collaborative Kanban board built with Next.js, TypeScript, Tailwind, and a modern API architecture (REST + GraphQL + tRPC).  
+This tool helps teams manage tasks by columns, track workflow, and improve productivity.
+
+## Features
+
+- Create, edit, delete tasks
+- Drag & drop between columns
+- User authentication
+- Different board views
+- Dark/Light mode
+- Real-time updates (later)
+
+## Tech Stack
+
+```
+- Next.js 16.0.3 (App Router)
+- TypeScript
+- TailwindCSS
+- Shadcn/UI
+- tRPC
+- REST API
+- GraphQL (Apollo)
+```
+
+## Project Structure
+
+/app → Main Next.js application (App Router)
+/docs → Project documentation (setup files, guides)
+/lib → Utilities, configurations, and shared functions
+/public → Static assets (images, icons)
 
 ## Getting Started
 
-First, run the development server:
+Clone the repo:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/hastiatarod/team-hasti-atarod.git
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Install dependencies:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm install
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Run development:
 
-## Learn More
+```bash
+pnpm dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Contribution Workflow (VERY IMPORTANT)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Create a feature branch:
+   `git checkout -b feature-branch`
+2. Commit changes:
+   `git commit -m "some message"`
+3. Sync with upstream:
+   `git fetch upstream`
+   `git merge upstream/main`
+   `git push origin feature-branch`
+4. Open Pull Request
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Next.js Setup Docs
 
-## Deploy on Vercel
+All Next.js-related installation and setup notes are inside:
+docs/next/
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Roadmap
