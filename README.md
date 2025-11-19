@@ -3,7 +3,7 @@
 A collaborative Kanban board built with Next.js, TypeScript, Tailwind, and a modern API architecture (REST + GraphQL + tRPC).  
 This tool helps teams manage tasks by columns, track workflow, and improve productivity.
 
-## Features
+## :sparkles: Features
 
 - Create, edit, delete tasks
 - Drag & drop between columns
@@ -26,10 +26,10 @@ This tool helps teams manage tasks by columns, track workflow, and improve produ
 
 ## Project Structure
 
-/app → Main Next.js application (App Router)
-/docs → Project documentation (setup files, guides)
-/lib → Utilities, configurations, and shared functions
-/public → Static assets (images, icons)
+- /app → Main Next.js application (App Router)
+- /docs → Project documentation (setup files, guides)
+- /lib → Utilities, configurations, and shared functions
+- /public → Static assets (images, icons)
 
 ## Getting Started
 
