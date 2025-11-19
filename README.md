@@ -1,6 +1,6 @@
 # Team Kanban Board
 
-A collaborative Kanban board built with Next.js, TypeScript, Tailwind, and a modern API architecture (REST + GraphQL + tRPC).  
+A collaborative Kanban board built with Next.js, TypeScript, Tailwind, and a modern API architecture (**REST** + `GraphQL` + tRPC).  
 This tool helps teams manage tasks by columns, track workflow, and improve productivity.
 
 ## :sparkles: Features
