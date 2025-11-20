@@ -12,7 +12,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { Home, Calendar, Clipboard, Clock } from 'lucide-react';
+import { Calendar, Clipboard, Clock, MonitorCog } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import logo from 'next/image';
@@ -21,9 +21,9 @@ import { DropdownMenu, DropdownMenuTrigger } from './ui/dropdown-menu';
 
 const items = [
   {
-    title: 'Home',
-    url: '/',
-    icon: Home,
+    title: 'Projects',
+    url: '/projects',
+    icon: MonitorCog,
   },
   {
     title: 'My Task',
@@ -31,7 +31,7 @@ const items = [
     icon: Clipboard,
   },
   {
-    title: 'Calender',
+    title: 'Calendar',
     url: '/',
     icon: Calendar,
   },
