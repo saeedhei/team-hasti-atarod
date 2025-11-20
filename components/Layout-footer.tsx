@@ -1,6 +1,6 @@
 const Footer = () => {
   return (
-    <footer className="bg-gray-800 text-white py-6 mt-10">
+    <footer className="bg-gray-800 text-white py-6 w-full">
       <div className="max-w-4xl mx-auto text-center">
         <p>© 2025 Kanban Board. All rights reserved.</p>
         <div className="mt-2 flex justify-center gap-4">

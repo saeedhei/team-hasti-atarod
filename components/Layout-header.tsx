@@ -21,10 +21,7 @@ const Header = () => {
     <header className="w-full bg-white border-b border-gray-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
         {/* Left */}
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-blue-500 rounded-full" /> {/* Placeholder logo */}
-          <span className="text-lg font-semibold">Kanban Board</span>
-        </div>
+        <div className="flex items-center space-x-2"></div>
 
         {/* Center */}
         <nav className="flex-1 flex justify-center">
