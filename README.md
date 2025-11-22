@@ -58,6 +58,10 @@ pnpm dev
 
 ## :books: Documentation
 
+details>
+
+  <summary>docs</summary>
+
 - [KANBAN MODEL](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/KANBAN_MODEL.md)
 
 <details>
@@ -108,6 +112,7 @@ pnpm dev
 
 - [docker-run](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/couchdb/docker-run.md)
 
+</details>
 </details>
 
 ## :handshake: Contribution Workflow (VERY IMPORTANT)
