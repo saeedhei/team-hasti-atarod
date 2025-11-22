@@ -49,6 +49,18 @@ Workflow stage inside a board.
 | order     | number   | Position inside board        |
 | createdAt | datetime | Creation timestamp           |
 
+**Example**
+
+```json
+{
+  "id": "column_abc123",
+  "boardId": "board_123",
+  "title": "To Do",
+  "order": 0,
+  "createdAt": "2025-01-10T12:45:00.000Z"
+}
+```
+
 📝 Task
 
 Movable work item inside a column.
@@ -63,6 +75,22 @@ Movable work item inside a column.
 | status | enum | `todo`, `doing`, `done` |
 | createdAt | datetime | Creation timestamp |
 | updatedAt | datetime | Last update |
+
+**Example**
+
+```json
+{
+  "id": "task_x9f45",
+  "columnId": "column_abc123",
+  "title": "Implement login page UI",
+  "description": "Create login form with email & password fields, add validation, and connect to API.",
+  "assignee": "hasti",
+  "order": 2,
+  "status": "todo",
+  "createdAt": "2025-01-11T09:20:00.000Z",
+  "updatedAt": "2025-01-11T09:20:00.000Z"
+}
+```
 
 📌 Notes
 

@@ -1,4 +1,3 @@
-````md
 # Prettier Line Endings (LF)
 
 Prettier is configured to format files using **LF** to match Git and VSCode.
@@ -29,4 +28,3 @@ To auto-fix:
 With Format on Save enabled in VSCode, most line-ending issues are fixed automatically.
 
 Must be used together with `.gitattributes` to guarantee consistency across systems.
-````

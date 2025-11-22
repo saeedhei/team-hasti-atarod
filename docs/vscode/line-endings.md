@@ -1,4 +1,3 @@
-````md
 # VSCode Line Endings (LF)
 
 VSCode must save all files using **LF** to match the project's Git and Prettier settings.
@@ -23,4 +22,3 @@ The project includes a `.vscode/settings.json` with:
 `.vscode/settings.json` applies only inside the project, not globally.
 
 Combined with `.gitattributes`, this guarantees fully consistent LF usage.
-````
