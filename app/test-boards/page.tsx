@@ -1,4 +1,3 @@
-// app/test-boards/page.tsx
 import { revalidatePath } from 'next/cache';
 import { boardsDB } from '@/lib/couchdb';
 import type { Board } from '@/types/board';
@@ -6,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-// تابع تبدیل بدون هیچ any
+// Conversion function without using any
 function asBoard(doc: unknown): Board | null {
   if (!doc || typeof doc !== 'object') return null;
 
@@ -25,7 +24,7 @@ function asBoard(doc: unknown): Board | null {
   };
 }
 
-// Server Action: ایجاد برد
+// Server Action: create board
 async function createBoard(formData: FormData) {
   'use server';
   const title = formData.get('title');
@@ -43,7 +42,7 @@ async function createBoard(formData: FormData) {
   }
 }
 
-// Server Action: حذف برد
+// Server Action: delete board
 async function deleteBoard(id: string) {
   'use server';
   try {
@@ -64,7 +63,7 @@ async function deleteBoard(id: string) {
   }
 }
 
-// صفحه اصلی — Server Component
+// Main page — Server Component
 export default async function BoardsPage() {
   let boards: Board[] = [];
   let errorMsg: string | null = null;

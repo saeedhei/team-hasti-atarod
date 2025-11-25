@@ -1,5 +1,5 @@
-// GET / PUT / DELETE روی یک برد
-// app/api/boards/[id]/route.ts
+// GET / PUT / DELETE for a single board
+
 import { NextResponse } from 'next/server';
 import { boardsDB } from '@/lib/couchdb';
 import type { Board } from '@/types/board';

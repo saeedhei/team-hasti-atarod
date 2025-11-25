@@ -1,5 +1,5 @@
 // app/api/boards/route.ts
-// GET (لیست بردها) + POST (ساخت برد)
+// GET (board list) + POST (create board)
 import { NextResponse } from 'next/server';
 import { boardsDB } from '@/lib/couchdb';
 import type { Board } from '@/types/board';
@@ -9,9 +9,10 @@ import { randomUUID } from 'crypto';
 
 export async function GET() {
   try {
-    // nano: list() خروجی رو با doc=unknown برمی‌گردونه
+    // nano: list() returns docs with type `unknown` instead of Board
     const raw = await boardsDB.list({ include_docs: true });
-    // اینجا به TS می‌فهمونیم که doc همون Board هست
+
+    // Let TypeScript know that row.doc is a Board
     const data = raw as DocumentListResponse<Board>;
 
     const boards = data.rows.flatMap((row) => (row.doc ? [row.doc] : []));
