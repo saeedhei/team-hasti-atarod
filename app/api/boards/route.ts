@@ -1,29 +1,51 @@
+// app/api/boards/route.ts
+// GET (لیست بردها) + POST (ساخت برد)
 import { NextResponse } from 'next/server';
+import { boardsDB } from '@/lib/couchdb';
+import type { Board } from '@/types/board';
+import type { DocumentListResponse } from 'nano';
+import { createBoardSchema } from '@/validations/board';
+import { randomUUID } from 'crypto';
 
 export async function GET() {
   try {
-    const res = await fetch('http://127.0.0.1:5984/kanban_test/_all_docs?include_docs=true', {
-      headers: {
-        Authorization: 'Basic ' + Buffer.from('admin:secret123').toString('base64'),
-      },
-    });
+    // nano: list() خروجی رو با doc=unknown برمی‌گردونه
+    const raw = await boardsDB.list({ include_docs: true });
+    // اینجا به TS می‌فهمونیم که doc همون Board هست
+    const data = raw as DocumentListResponse<Board>;
 
-    if (!res.ok) {
-      return NextResponse.json(
-        { error: 'Failed to fetch data from CouchDB' },
-        { status: res.status },
-      );
+    const boards = data.rows.flatMap((row) => (row.doc ? [row.doc] : []));
+
+    return NextResponse.json({ boards });
+  } catch (err) {
+    console.error('GET Boards Error:', err);
+    return NextResponse.json({ error: 'Failed to fetch boards' }, { status: 500 });
+  }
+}
+
+export async function POST(req: Request) {
+  try {
+    const body = await req.json();
+    const parsed = createBoardSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json({ errors: parsed.error.flatten() }, { status: 400 });
     }
 
-    const data = await res.json();
+    const { title, description } = parsed.data;
 
-    // Extract the "doc" objects from CouchDB response
-    const boards = data.rows.map((row: any) => row.doc);
+    const board: Board = {
+      _id: randomUUID(),
+      type: 'board',
+      title,
+      description,
+    };
 
-    // Return JSON to frontend
-    return NextResponse.json({ boards });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    const result = await boardsDB.insert(board);
+
+    return NextResponse.json({ message: 'Board created', id: result.id }, { status: 201 });
+  } catch (err) {
+    console.error('POST Board Error:', err);
+    return NextResponse.json({ error: 'Failed to create board' }, { status: 500 });
   }
 }
