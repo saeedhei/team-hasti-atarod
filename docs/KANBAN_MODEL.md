@@ -29,7 +29,7 @@ Represents a single workspace.
 
 ```json
 {
-  "id": "board_123",
+  "_id": "board_123",
   "title": "Main Board",
   "description": "Project workflow",
   "createdAt": "2024-01-10",
@@ -53,7 +53,7 @@ Workflow stage inside a board.
 
 ```json
 {
-  "id": "column_abc123",
+  "_id": "column_abc123",
   "boardId": "board_123",
   "title": "To Do",
   "order": 0,
@@ -80,7 +80,7 @@ Movable work item inside a column.
 
 ```json
 {
-  "id": "task_x9f45",
+  "_id": "task_x9f45",
   "columnId": "column_abc123",
   "title": "Implement login page UI",
   "description": "Create login form with email & password fields, add validation, and connect to API.",
