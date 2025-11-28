@@ -2,8 +2,19 @@
 // UI-only Kanban board component.
 // - No data fetching
 'use client';
+import { TaskDetails } from './TaskDetails';
 import dynamic from 'next/dynamic';
 import React, { useCallback, useMemo, useState } from 'react';
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -53,12 +64,13 @@ export type Board = {
 const id = (prefix = '') => `${prefix}${Math.random().toString(36).slice(2, 9)}`;
 
 // ---------- Task Card ----------
-const TaskCard: React.FC<{ task: Task }> = React.memo(({ task }) => {
+const TaskCard: React.FC<{ task: Task; onClick?: () => void }> = React.memo(({ task, onClick }) => {
   return (
     <article
-      className="bg-white border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-150"
+      className="bg-white border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-150 cursor-pointer"
       aria-labelledby={`task-${task.id}-title`}
-      role="article"
+      role="button"
+      onClick={onClick}
     >
       <h3 id={`task-${task.id}-title`} className="text-sm font-semibold text-slate-900">
         {task.title}
@@ -108,7 +120,10 @@ const TaskCard: React.FC<{ task: Task }> = React.memo(({ task }) => {
 TaskCard.displayName = 'TaskCard';
 
 // ---------- Column View ----------
-const ColumnView: React.FC<{ column: Column }> = ({ column }) => {
+const ColumnView: React.FC<{
+  column: Column;
+  onTaskClick: (task: Task) => void;
+}> = ({ column, onTaskClick }) => {
   return (
     <section aria-labelledby={`col-${column.id}-title`} className="w-full max-w-xs">
       <div className="flex items-center justify-between mb-3">
@@ -128,7 +143,7 @@ const ColumnView: React.FC<{ column: Column }> = ({ column }) => {
 
       <div className="space-y-3">
         {column.tasks.map((task) => (
-          <TaskCard key={task.id} task={task} />
+          <TaskCard key={task.id} task={task} onClick={() => onTaskClick(task)} />
         ))}
       </div>
     </section>
@@ -211,6 +226,9 @@ export default function BoardClient({ initialBoard }: { initialBoard?: Board }) 
     );
   });
   const [isCreating, setIsCreating] = useState(false);
+  // Task detail drawer states
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [isTaskOpen, setIsTaskOpen] = useState(false);
 
   const columns = useMemo(() => board.columns, [board.columns]);
 
@@ -260,12 +278,23 @@ export default function BoardClient({ initialBoard }: { initialBoard?: Board }) 
           </DialogContent>
         </Dialog>
       </header>
+      <Drawer open={isTaskOpen} onOpenChange={setIsTaskOpen}>
+        <DrawerContent className="w-1/2 ml-auto p-6 overflow-auto">
+          {selectedTask && <TaskDetails task={selectedTask} onClose={() => setIsTaskOpen(false)} />}
+        </DrawerContent>
+      </Drawer>
 
       {/* Columns */}
-      <section className="flex gap-6 overflow-x-auto pb-6">
+      <section className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide">
         {columns.map((col) => (
           <div key={col.id} className="shrink-0" style={{ width: 320 }}>
-            <ColumnView column={col} />
+            <ColumnView
+              column={col}
+              onTaskClick={(task) => {
+                setSelectedTask(task);
+                setIsTaskOpen(true);
+              }}
+            />
           </div>
         ))}
       </section>
