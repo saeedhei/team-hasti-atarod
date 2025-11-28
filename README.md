@@ -22,6 +22,7 @@ This tool helps teams manage tasks by columns, track workflow, and improve produ
 - tRPC
 - REST API
 - GraphQL (Apollo)
+- CouchDB (nano client)
 ```
 
 ## :file_folder: Project Structure
@@ -61,67 +62,70 @@ pnpm dev
 <details>
   <summary>docs</summary>
 
-- [KANBAN MODEL](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/KANBAN_MODEL.md)
+- [Architecture](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Architecture)
 
-<details>
-  <summary>vscode</summary>
+  - [data model](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Architecture/data-model.md)
+  - [api architecture](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Architecture/api-architecture.md)
+  - [system overview](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Architecture/system-overview.md)
 
-- [install](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/vscode/line-endings.md)
+- [Backend](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Backend)
 
-</details>
+  - [couchdb](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Backend/couchdb)
+    - [nano](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Backend/couchdb/nano)
+      - [typescript](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Backend/couchdb/nano/typescript.md)
+    - [docker run](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Backend/couchdb/docker-run.md)
+  - [docker](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Backend/docker.md)
 
-<details>
-  <summary>prettier</summary>
+- [Frontend](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Frontend)
 
-- [line-endings](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/prettier/line-endings.md)
+  - [nextjs](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Frontend/nextjs/)
+    - [nextjs-16 upgrade](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Frontend/nextjs/nextjs-16-upgrade.md)
+    - [setup next](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Frontend/nextjs/setup-next.md)
+  - [UI](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Frontend/UI)
+    - [shadcn components](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Frontend/UI/shadcn-components.md)
 
-</details>
+- [Setup](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Setup)
 
-<details>
-  <summary>pnpm</summary>
+  - [pnpm](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Setup/pnpm)
+    - [install](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Setup/pnpm/install.md)
+  - [prettier](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Setup/prettier)
+    - [line endings](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Setup/prettier/line-endings.md)
+  - [vscode](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Setup/vscode)
+    - [line endings](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Setup/vscode/line-endings.md)
 
-- [install](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/pnpm/install.md)
+- [Git](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Git)
 
-</details>
+  - [line endings](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Git/line-endings.md)
+  - [pr](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Git/pr.md)
 
-<details>
-  <summary>next</summary>
+- [Problem](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Problem)
+  - [object literal error](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Problem/object-literal-error.md)
 
-- [setup-next](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/next/setup-next.md)
-
-</details>
-
-<details>
-  <summary>git</summary>
-
-- [pr](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/git/pr.md)
-- [line-endings](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/git/line-endings.md)
-
-</details>
-
-<details>
-  <summary>docker</summary>
-
-- [couchdb](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/docker/couchdb.md)
-
-</details>
-
-<details>
-  <summary>couchdb</summary>
-
-- [docker-run](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/couchdb/docker-run.md)
-
-</details>
 </details>
 
 ## :handshake: Contribution Workflow (VERY IMPORTANT)
 
 1. Create a feature branch:
-   `git checkout -b feature-branch`
+
+```bash
+
+   git checkout -b feature-branch
+```
+
 2. Commit changes:
-   `git commit -m "some message"`
+
+```bash
+
+   git commit -m "some message"
+```
+
 3. Sync with upstream:
-   `git fetch upstream`
-   `git merge upstream/main`
-   `git push origin feature-branch`
+
+```bash
+
+   git fetch upstream
+   git merge upstream/main
+   git push origin feature-branch
+```
+
 4. Open Pull Request
