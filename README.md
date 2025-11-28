@@ -62,43 +62,43 @@ pnpm dev
 <details>
   <summary>docs</summary>
 
-- [Architecture](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Architecture)
+- [Architecture](https://github.com/saeedhei/team-hasti-atarod/tree/main/docs/Architecture)
 
   - [data model](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Architecture/data-model.md)
   - [api architecture](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Architecture/api-architecture.md)
   - [system overview](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Architecture/system-overview.md)
 
-- [Backend](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Backend)
+- [Backend](https://github.com/saeedhei/team-hasti-atarod/tree/main/docs/Backend)
 
-  - [couchdb](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Backend/couchdb)
-    - [nano](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Backend/couchdb/nano)
+  - [couchdb](https://github.com/saeedhei/team-hasti-atarod/tree/main/docs/Backend/couchdb)
+    - [nano](https://github.com/saeedhei/team-hasti-atarod/tree/main/docs/Backend/couchdb/nano)
       - [typescript](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Backend/couchdb/nano/typescript.md)
     - [docker run](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Backend/couchdb/docker-run.md)
   - [docker](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Backend/docker.md)
 
-- [Frontend](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Frontend)
+- [Frontend](https://github.com/saeedhei/team-hasti-atarod/tree/main/docs/Frontend)
 
-  - [nextjs](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Frontend/nextjs/)
+  - [nextjs](https://github.com/saeedhei/team-hasti-atarod/tree/main/docs/Frontend/nextjs/)
     - [nextjs-16 upgrade](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Frontend/nextjs/nextjs-16-upgrade.md)
     - [setup next](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Frontend/nextjs/setup-next.md)
-  - [UI](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Frontend/UI)
+  - [UI](https://github.com/saeedhei/team-hasti-atarod/tree/main/docs/Frontend/UI)
     - [shadcn components](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Frontend/UI/shadcn-components.md)
 
-- [Setup](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Setup)
+- [Setup](https://github.com/saeedhei/team-hasti-atarod/tree/main/docs/Setup)
 
-  - [pnpm](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Setup/pnpm)
+  - [pnpm](https://github.com/saeedhei/team-hasti-atarod/tree/main/docs/Setup/pnpm)
     - [install](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Setup/pnpm/install.md)
-  - [prettier](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Setup/prettier)
+  - [prettier](https://github.com/saeedhei/team-hasti-atarod/tree/main/docs/Setup/prettier)
     - [line endings](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Setup/prettier/line-endings.md)
-  - [vscode](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Setup/vscode)
+  - [vscode](https://github.com/saeedhei/team-hasti-atarod/tree/main/docs/Setup/vscode)
     - [line endings](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Setup/vscode/line-endings.md)
 
-- [Git](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Git)
+- [Git](https://github.com/saeedhei/team-hasti-atarod/tree/main/docs/Git)
 
   - [line endings](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Git/line-endings.md)
   - [pr](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Git/pr.md)
 
-- [Problem](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Problem)
+- [Problem](https://github.com/saeedhei/team-hasti-atarod/tree/main/docs/Problem)
   - [object literal error](https://github.com/saeedhei/team-hasti-atarod/blob/main/docs/Problem/object-literal-error.md)
 
 </details>
