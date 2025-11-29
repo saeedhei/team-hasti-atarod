@@ -7,6 +7,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
+function slugify(title: string) {
+  return title
+    .toLowerCase()
+    .replace(/ /g, '-')
+    .replace(/[^\w-]+/g, '');
+}
+
 // Conversion function without using any
 function asBoard(doc: unknown): Board | null {
   if (!doc || typeof doc !== 'object') return null;
@@ -34,7 +41,7 @@ async function createBoard(formData: FormData) {
 
   try {
     await boardsDB.insert({
-      _id: new Date().toISOString(),
+      _id: `${slugify(title.trim())}-${Math.random().toString(36).slice(2, 7)}`,
       type: 'board',
       title: title.trim(),
     } as Board);
