@@ -150,7 +150,7 @@ const ColumnView: React.FC<{
       <Button
         variant="outline"
         size="sm"
-        className="w-full"
+        className="w-full mt-3 cursor-pointer"
         onClick={() => onAddTaskClick(column.id)}
       >
         + Add Task
