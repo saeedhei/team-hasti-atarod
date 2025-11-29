@@ -123,7 +123,8 @@ TaskCard.displayName = 'TaskCard';
 const ColumnView: React.FC<{
   column: Column;
   onTaskClick: (task: Task) => void;
-}> = ({ column, onTaskClick }) => {
+  onAddTaskClick: (columnId: string) => void;
+}> = ({ column, onTaskClick, onAddTaskClick }) => {
   return (
     <section aria-labelledby={`col-${column.id}-title`} className="w-full max-w-xs">
       <div className="flex items-center justify-between mb-3">
@@ -146,6 +147,14 @@ const ColumnView: React.FC<{
           <TaskCard key={task.id} task={task} onClick={() => onTaskClick(task)} />
         ))}
       </div>
+      <Button
+        variant="outline"
+        size="sm"
+        className="w-full"
+        onClick={() => onAddTaskClick(column.id)}
+      >
+        + Add Task
+      </Button>
     </section>
   );
 };
@@ -229,6 +238,7 @@ export default function BoardClient({ initialBoard }: { initialBoard?: Board }) 
   // Task detail drawer states
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isTaskOpen, setIsTaskOpen] = useState(false);
+  const [targetColumnId, setTargetColumnId] = useState<string | null>(null);
 
   const columns = useMemo(() => board.columns, [board.columns]);
 
@@ -260,7 +270,7 @@ export default function BoardClient({ initialBoard }: { initialBoard?: Board }) 
 
         <Dialog open={isCreating} onOpenChange={setIsCreating}>
           <DialogTrigger asChild>
-            <Button>Add Task</Button>
+            <Button onClick={() => setTargetColumnId(null)}>Add Task</Button>
           </DialogTrigger>
 
           <DialogContent className="sm:max-w-lg">
@@ -270,6 +280,7 @@ export default function BoardClient({ initialBoard }: { initialBoard?: Board }) 
 
             <CreateTaskForm
               columns={columns}
+              selectedColumnId={targetColumnId ?? undefined}
               onCreate={(colId, payload) => {
                 addTask(colId, payload);
                 setIsCreating(false);
@@ -294,6 +305,10 @@ export default function BoardClient({ initialBoard }: { initialBoard?: Board }) 
                 setSelectedTask(task);
                 setIsTaskOpen(true);
               }}
+              onAddTaskClick={(columnId) => {
+                setTargetColumnId(columnId); // set column for auto-select
+                setIsCreating(true); // open modal
+              }}
             />
           </div>
         ))}
@@ -305,14 +320,15 @@ export default function BoardClient({ initialBoard }: { initialBoard?: Board }) 
 // ---------- Create Task Form ----------
 const CreateTaskForm: React.FC<{
   columns: Column[];
+  selectedColumnId?: string;
   onCreate: (
     columnId: string,
     payload: { title: string; description?: string; priority?: Priority },
   ) => void;
-}> = ({ columns, onCreate }) => {
+}> = ({ columns, selectedColumnId, onCreate }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [columnId, setColumnId] = useState(columns[0]?.id ?? '');
+  const [columnId, setColumnId] = useState(selectedColumnId ?? columns[0]?.id ?? '');
   const [priority, setPriority] = useState<Priority>('low');
 
   const disabled = title.trim().length === 0;
