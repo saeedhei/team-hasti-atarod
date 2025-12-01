@@ -298,7 +298,7 @@ export default function BoardClient({ initialBoard }: { initialBoard?: Board }) 
       {/* Columns */}
       <section className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide">
         {columns.map((col) => (
-          <div key={col.id} className="shrink-0" style={{ width: 320 }}>
+          <div key={col.id} className="shrink-0" style={{ width: 250 }}>
             <ColumnView
               column={col}
               onTaskClick={(task) => {
