@@ -1,22 +1,14 @@
 // app/boards/[id]/BoardClient.tsx
-// UI-only Kanban board component.
-// - No data fetching
 'use client';
+
+import { useCallback, useMemo, useState } from 'react';
+import { addTaskAction } from './actions';
 import { TaskDetails } from './TaskDetails';
-import dynamic from 'next/dynamic';
-import React, { useCallback, useMemo, useState } from 'react';
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from '@/components/ui/drawer';
+import type { Board, List, Task } from '@/types/board';
+
+import { Drawer, DrawerContent } from '@/components/ui/drawer';
+
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   Dialog,
   DialogContent,
@@ -24,253 +16,150 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
-// ---------- Types ----------
-export type Priority = 'low' | 'medium' | 'high';
+// Utility: simple id generator
+const genId = (prefix = '') => `${prefix}${Math.random().toString(36).slice(2, 9)}`;
 
-export type Tag = {
-  id: string;
-  label: string;
-};
+// ---------------------- Task Card ----------------------
+const TaskCard = ({ task, onClick }: { task: Task; onClick?: () => void }) => (
+  <article
+    className="bg-white border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+    onClick={onClick}
+  >
+    <h3 className="text-sm font-semibold">{task.title}</h3>
 
-export type Task = {
-  id: string;
-  title: string;
-  description?: string;
-  tags?: Tag[];
-  assignee?: { id: string; name: string; initials?: string };
-  priority?: Priority;
-  progress?: number; // 0–100
-};
+    {task.description && <p className="text-xs text-slate-600 mt-2">{task.description}</p>}
 
-export type Column = {
-  id: string;
-  title: string;
-  color?: string; // tailwind color class or hex
-  tasks: Task[];
-};
-
-export type Board = {
-  id: string;
-  title: string;
-  columns: Column[];
-};
-
-// Utility: friendly id generator (not cryptographically secure)
-const id = (prefix = '') => `${prefix}${Math.random().toString(36).slice(2, 9)}`;
-
-// ---------- Task Card ----------
-const TaskCard: React.FC<{ task: Task; onClick?: () => void }> = React.memo(({ task, onClick }) => {
-  return (
-    <article
-      className="bg-white border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-150 cursor-pointer"
-      aria-labelledby={`task-${task.id}-title`}
-      role="button"
-      onClick={onClick}
-    >
-      <h3 id={`task-${task.id}-title`} className="text-sm font-semibold text-slate-900">
-        {task.title}
-      </h3>
-
-      {task.description && <p className="text-xs text-slate-600 mt-2">{task.description}</p>}
-
-      <div className="mt-3 flex items-center justify-between gap-2">
-        {/* Tags */}
-        <div className="flex flex-wrap gap-2">
-          {task.tags?.slice(0, 3).map((t) => (
-            <Badge key={t.id} className="text-xs py-1 px-2">
-              {t.label}
-            </Badge>
-          ))}
-        </div>
-
-        {/* Progress + Assignee */}
-        <div className="flex items-center gap-2">
-          {typeof task.progress === 'number' && (
-            <div className="w-24 text-xs">
-              <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                <div
-                  className="h-full rounded-full"
-                  style={{
-                    width: `${Math.max(0, Math.min(100, task.progress))}%`,
-                    background: '#F59E0B',
-                  }}
-                />
-              </div>
-              <div className="text-slate-500 text-[10px] mt-1">{task.progress}%</div>
-            </div>
-          )}
-
-          {task.assignee && (
-            <Avatar className="h-7 w-7">
-              <AvatarFallback>
-                {task.assignee.initials ?? task.assignee.name.charAt(0)}
-              </AvatarFallback>
-            </Avatar>
-          )}
-        </div>
-      </div>
-    </article>
-  );
-});
-TaskCard.displayName = 'TaskCard';
-
-// ---------- Column View ----------
-const ColumnView: React.FC<{
-  column: Column;
-  onTaskClick: (task: Task) => void;
-  onAddTaskClick: (columnId: string) => void;
-}> = ({ column, onTaskClick, onAddTaskClick }) => {
-  return (
-    <section aria-labelledby={`col-${column.id}-title`} className="w-full max-w-xs">
-      <div className="flex items-center justify-between mb-3">
-        <h2
-          id={`col-${column.id}-title`}
-          className="text-sm font-semibold text-slate-900 flex items-center gap-2"
-        >
-          <span
-            className={cn('inline-block h-3 w-3 rounded-full', column.color ?? 'bg-slate-400')}
-            aria-hidden
-          />
-          {column.title}
-        </h2>
-
-        <span className="text-sm text-slate-500">{column.tasks.length}</span>
-      </div>
-      <Button
-        variant="outline"
-        size="sm"
-        className="w-full mb-3 cursor-pointer"
-        onClick={() => onAddTaskClick(column.id)}
-      >
-        + Add Card
-      </Button>
-
-      <div className="space-y-3">
-        {column.tasks.map((task) => (
-          <TaskCard key={task.id} task={task} onClick={() => onTaskClick(task)} />
+    <div className="mt-3 flex items-center justify-between gap-2">
+      {/* Tags */}
+      <div className="flex flex-wrap gap-2">
+        {task.tags?.slice(0, 3).map((t) => (
+          <Badge key={t.id} className="text-xs py-1 px-2">
+            {t.label}
+          </Badge>
         ))}
       </div>
-    </section>
-  );
-};
 
-// ---------- Main UI Component ----------
-export default function BoardClient({ initialBoard }: { initialBoard?: Board }) {
-  // IMPORTANT: fallback board is created *CLIENT-ONLY*
-  const [board, setBoard] = useState<Board>(() => {
-    return (
-      initialBoard ?? {
-        id: 'board-' + id(),
-        title: 'Website Redesign Project',
-        columns: [
-          {
-            id: 'backlog',
-            title: 'Backlog',
-            color: 'bg-slate-400',
-            tasks: [
-              {
-                id: id('t-'),
-                title: 'User Research Analysis',
-                description: 'Analyze user feedback and create personas',
-                tags: [{ id: id('tag-'), label: 'Research' }],
-                priority: 'high',
-              },
-              {
-                id: id('t-'),
-                title: 'Content Strategy',
-                description: 'Develop content hierarchy',
-                tags: [{ id: id('tag-'), label: 'Content' }],
-                priority: 'medium',
-              },
-            ],
-          },
-          {
-            id: 'todo',
-            title: 'To Do',
-            color: 'bg-sky-400',
-            tasks: [
-              {
-                id: id('t-'),
-                title: 'Homepage Wireframes',
-                description: 'Create low-fidelity wireframes',
-              },
-            ],
-          },
-          {
-            id: 'inprogress',
-            title: 'In Progress',
-            color: 'bg-amber-400',
-            tasks: [
-              {
-                id: id('t-'),
-                title: 'Navigation Component',
-                description: 'Develop responsive navigation',
-                tags: [{ id: id('tag-'), label: 'Frontend' }],
-                progress: 65,
-                priority: 'medium',
-              },
-            ],
-          },
-          {
-            id: 'completed',
-            title: 'Completed',
-            color: 'bg-emerald-400',
-            tasks: [
-              {
-                id: id('t-'),
-                title: 'Project Setup',
-                description: 'Init repo and env',
-                tags: [{ id: id('tag-'), label: 'Setup' }],
-                priority: 'low',
-              },
-            ],
-          },
-        ],
-      }
-    );
-  });
+      {/* Progress + Assignee */}
+      <div className="flex items-center gap-2">
+        {typeof task.progress === 'number' && (
+          <div className="w-24 text-xs">
+            <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div
+                className="h-full rounded-full bg-yellow-500"
+                style={{
+                  width: `${Math.min(100, Math.max(0, task.progress))}%`,
+                }}
+              />
+            </div>
+            <div className="text-slate-500 text-[10px] mt-1">{task.progress}%</div>
+          </div>
+        )}
+
+        {task.assignee && (
+          <Avatar className="h-7 w-7">
+            <AvatarFallback>
+              {task.assignee.initials ?? task.assignee.name.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+        )}
+      </div>
+    </div>
+  </article>
+);
+
+// ---------------------- List View ----------------------
+const ListView = ({
+  list,
+  onTaskClick,
+  onAddTaskClick,
+}: {
+  list: List;
+  onTaskClick: (task: Task) => void;
+  onAddTaskClick: (listId: string) => void;
+}) => (
+  <section className="w-full max-w-xs">
+    <div className="flex items-center justify-between mb-3">
+      <h2 className="text-sm font-semibold flex items-center gap-2">
+        <span className={cn('inline-block h-3 w-3 rounded-full', list.color ?? 'bg-slate-400')} />
+        {list.title}
+      </h2>
+      <span className="text-sm text-slate-500">{list.tasks.length}</span>
+    </div>
+
+    <div className="space-y-3">
+      {list.tasks.map((task) => (
+        <TaskCard key={task.id} task={task} onClick={() => onTaskClick(task)} />
+      ))}
+    </div>
+
+    <Button
+      variant="outline"
+      size="sm"
+      className="w-full mt-3 cursor-pointer"
+      onClick={() => onAddTaskClick(list.id)}
+    >
+      + Add Task
+    </Button>
+  </section>
+);
+
+// ---------------------- Main Component ----------------------
+export default function BoardClient({ initialBoard }: { initialBoard: Board }) {
+  const safeBoard: Board = {
+    ...initialBoard,
+    list: Array.isArray(initialBoard.list) ? initialBoard.list : [],
+  };
+
+  const [board, setBoard] = useState<Board>(safeBoard);
+
   const [isCreating, setIsCreating] = useState(false);
-  // Task detail drawer states
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isTaskOpen, setIsTaskOpen] = useState(false);
-  const [targetColumnId, setTargetColumnId] = useState<string | null>(null);
+  const [targetListId, setTargetListId] = useState<string | null>(null);
 
-  const columns = useMemo(() => board.columns, [board.columns]);
+  const lists = useMemo(() => board.list, [board.list]);
 
-  // Add task (local UI state only)
+  const boardId = board._id;
+
+  // ---------------- Add Task ----------------
   const addTask = useCallback(
-    (columnId: string, payload: Pick<Task, 'title' | 'description' | 'priority'>) => {
-      setBoard((prev) => {
-        const newTask: Task = {
-          id: id('t-'),
-          title: payload.title,
-          description: payload.description,
-          priority: payload.priority ?? 'low',
-        };
+    async (listId: string, payload: Pick<Task, 'title' | 'description' | 'priority'>) => {
+      const newTask: Task = {
+        id: genId('t-'),
+        title: payload.title,
+        description: payload.description,
+        priority: payload.priority ?? 'low',
+      };
 
-        const newColumns = prev.columns.map((col) =>
-          col.id === columnId ? { ...col, tasks: [newTask, ...col.tasks] } : col,
-        );
+      // Optimistic UI update
+      setBoard((prev) => ({
+        ...prev,
+        list: prev.list.map((list) =>
+          list.id === listId ? { ...list, tasks: [newTask, ...list.tasks] } : list,
+        ),
+      }));
 
-        return { ...prev, columns: newColumns };
-      });
+      await addTaskAction(boardId, listId, newTask);
     },
-    [],
+    [boardId],
   );
 
   return (
     <main className="p-6 max-w-full">
+      {/* Header */}
       <header className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">{board.title}</h1>
+        <h1 className="text-2xl font-bold">{board.title}</h1>
 
         <Dialog open={isCreating} onOpenChange={setIsCreating}>
           <DialogTrigger asChild>
-            <Button onClick={() => setTargetColumnId(null)}>Add Task</Button>
+            <Button onClick={() => setTargetListId(null)}>Add Task</Button>
           </DialogTrigger>
 
           <DialogContent className="sm:max-w-lg">
@@ -279,35 +168,37 @@ export default function BoardClient({ initialBoard }: { initialBoard?: Board }) 
             </DialogHeader>
 
             <CreateTaskForm
-              columns={columns}
-              selectedColumnId={targetColumnId ?? undefined}
-              onCreate={(colId, payload) => {
-                addTask(colId, payload);
+              lists={lists}
+              selectedListId={targetListId ?? undefined}
+              onCreate={(listId, payload) => {
+                addTask(listId, payload);
                 setIsCreating(false);
               }}
             />
           </DialogContent>
         </Dialog>
       </header>
+
+      {/* Task Drawer */}
       <Drawer open={isTaskOpen} onOpenChange={setIsTaskOpen}>
         <DrawerContent className="w-1/2 ml-auto p-6 overflow-auto">
           {selectedTask && <TaskDetails task={selectedTask} onClose={() => setIsTaskOpen(false)} />}
         </DrawerContent>
       </Drawer>
 
-      {/* Columns */}
+      {/* Lists */}
       <section className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide">
-        {columns.map((col) => (
-          <div key={col.id} className="shrink-0" style={{ width: 250 }}>
-            <ColumnView
-              column={col}
+        {lists.map((list) => (
+          <div key={list.id} className="shrink-0" style={{ width: 320 }}>
+            <ListView
+              list={list}
               onTaskClick={(task) => {
                 setSelectedTask(task);
                 setIsTaskOpen(true);
               }}
-              onAddTaskClick={(columnId) => {
-                setTargetColumnId(columnId); // set column for auto-select
-                setIsCreating(true); // open modal
+              onAddTaskClick={(listId) => {
+                setTargetListId(listId);
+                setIsCreating(true);
               }}
             />
           </div>
@@ -317,19 +208,20 @@ export default function BoardClient({ initialBoard }: { initialBoard?: Board }) 
   );
 }
 
-// ---------- Create Task Form ----------
-const CreateTaskForm: React.FC<{
-  columns: Column[];
-  selectedColumnId?: string;
-  onCreate: (
-    columnId: string,
-    payload: { title: string; description?: string; priority?: Priority },
-  ) => void;
-}> = ({ columns, selectedColumnId, onCreate }) => {
+// ---------------------- Create Task Form ----------------------
+const CreateTaskForm = ({
+  lists,
+  selectedListId,
+  onCreate,
+}: {
+  lists: List[];
+  selectedListId?: string;
+  onCreate: (listId: string, payload: Pick<Task, 'title' | 'description' | 'priority'>) => void;
+}) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [columnId, setColumnId] = useState(selectedColumnId ?? columns[0]?.id ?? '');
-  const [priority, setPriority] = useState<Priority>('low');
+  const [listId, setListId] = useState(selectedListId ?? lists[0]?.id ?? '');
+  const [priority, setPriority] = useState<Task['priority']>('low');
 
   const disabled = title.trim().length === 0;
 
@@ -337,53 +229,56 @@ const CreateTaskForm: React.FC<{
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        if (disabled) return;
+        if (!disabled) {
+          onCreate(listId, {
+            title: title.trim(),
+            description: description.trim() || undefined,
+            priority,
+          });
 
-        onCreate(columnId, {
-          title: title.trim(),
-          description: description.trim() || undefined,
-          priority,
-        });
-
-        setTitle('');
-        setDescription('');
+          setTitle('');
+          setDescription('');
+        }
       }}
       className="space-y-4"
     >
+      {/* Title */}
       <div>
-        <Label htmlFor="task-title">Title</Label>
-        <Input id="task-title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+        <Label htmlFor="title">Title</Label>
+        <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} required />
       </div>
 
+      {/* Description */}
       <div>
-        <Label htmlFor="task-desc">Description</Label>
+        <Label htmlFor="description">Description</Label>
         <Input
-          id="task-desc"
+          id="description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
       </div>
 
+      {/* List Select */}
       <div>
-        <Label htmlFor="task-column">Column</Label>
+        <Label>List</Label>
         <select
-          id="task-column"
           className="w-full p-2 border rounded-md"
-          value={columnId}
-          onChange={(e) => setColumnId(e.target.value)}
+          value={listId}
+          onChange={(e) => setListId(e.target.value)}
         >
-          {columns.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.title}
+          {lists.map((l) => (
+            <option key={l.id} value={l.id}>
+              {l.title}
             </option>
           ))}
         </select>
       </div>
 
+      {/* Priority */}
       <div>
         <Label>Priority</Label>
         <div className="flex gap-2 mt-1">
-          {(['low', 'medium', 'high'] as Priority[]).map((p) => (
+          {(['low', 'medium', 'high'] as const).map((p) => (
             <button
               key={p}
               type="button"
@@ -399,6 +294,7 @@ const CreateTaskForm: React.FC<{
         </div>
       </div>
 
+      {/* Submit */}
       <div className="flex justify-end">
         <Button type="submit" disabled={disabled}>
           Create

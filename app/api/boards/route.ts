@@ -40,6 +40,12 @@ export async function POST(req: Request) {
       type: 'board',
       title,
       description,
+      list: [
+        { id: 'backlog', title: 'Backlog', color: 'bg-slate-400', tasks: [] },
+        { id: 'todo', title: 'To Do', color: 'bg-sky-400', tasks: [] },
+        { id: 'inprogress', title: 'In Progress', color: 'bg-amber-400', tasks: [] },
+        { id: 'done', title: 'Completed', color: 'bg-emerald-400', tasks: [] },
+      ],
     };
 
     const result = await boardsDB.insert(board);
