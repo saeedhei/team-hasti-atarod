@@ -2,7 +2,7 @@
 'use client';
 
 import { useCallback, useMemo, useState } from 'react';
-import { addTaskAction } from './actions';
+import { addTaskAction, createListAction, deleteListAction, deleteTaskAction } from './actions';
 import { TaskDetails } from './TaskDetails';
 import type { Board, List, Task } from '@/types/board';
 
@@ -22,6 +22,7 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { title } from 'process';
 
 // Utility: simple id generator
 const genId = (prefix = '') => `${prefix}${Math.random().toString(36).slice(2, 9)}`;
@@ -79,10 +80,14 @@ const ListView = ({
   list,
   onTaskClick,
   onAddTaskClick,
+  onDeleteList,
+  onDeleteTask,
 }: {
   list: List;
   onTaskClick: (task: Task) => void;
   onAddTaskClick: (listId: string) => void;
+  onDeleteList: (listId: string) => void;
+  onDeleteTask: (taskId: string) => void;
 }) => (
   <section className="w-full max-w-xs">
     <div className="flex items-center justify-between mb-3">
@@ -90,12 +95,30 @@ const ListView = ({
         <span className={cn('inline-block h-3 w-3 rounded-full', list.color ?? 'bg-slate-400')} />
         {list.title}
       </h2>
-      <span className="text-sm text-slate-500">{list.tasks.length}</span>
+      {/* Delete List Button */}
+      <button
+        className="text-red-500 hover:text-red-700 text-xs"
+        onClick={() => onDeleteList(list.id)}
+      >
+        Delete
+      </button>
     </div>
 
     <div className="space-y-3">
       {list.tasks.map((task) => (
-        <TaskCard key={task.id} task={task} onClick={() => onTaskClick(task)} />
+        <div key={task.id} className="relative">
+          <TaskCard key={task.id} task={task} onClick={() => onTaskClick(task)} />
+          {/* Delete Task Button */}
+          <button
+            className="absolute top-2 right-2 text-red-500 text-xs hover:text-red-700"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDeleteTask(task.id);
+            }}
+          >
+            ✕
+          </button>
+        </div>
       ))}
     </div>
 
@@ -105,7 +128,7 @@ const ListView = ({
       className="w-full mt-3 cursor-pointer"
       onClick={() => onAddTaskClick(list.id)}
     >
-      + Add Task
+      + Add Card
     </Button>
   </section>
 );
@@ -119,7 +142,8 @@ export default function BoardClient({ initialBoard }: { initialBoard: Board }) {
 
   const [board, setBoard] = useState<Board>(safeBoard);
 
-  const [isCreating, setIsCreating] = useState(false);
+  const [isCreatingList, setIsCreatingList] = useState(false);
+  const [isCreatingTask, setIsCreatingTask] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isTaskOpen, setIsTaskOpen] = useState(false);
   const [targetListId, setTargetListId] = useState<string | null>(null);
@@ -151,33 +175,96 @@ export default function BoardClient({ initialBoard }: { initialBoard: Board }) {
     [boardId],
   );
 
+  // ---------------- Add List ----------------
+  const addList = useCallback(
+    async (title: string) => {
+      const newList: List = {
+        id: genId('list-'),
+        title,
+        color: 'bg-slate-300',
+        tasks: [],
+      };
+
+      // Optimistic UI update
+      setBoard((prev) => ({
+        ...prev,
+        list: [...prev.list, newList],
+      }));
+      await createListAction(boardId, newList);
+    },
+    [boardId],
+  );
+  // ---------------- Delete List ----------------
+  const deleteList = useCallback(
+    async (listId: string) => {
+      // Optimistic UI update
+      setBoard((prev) => ({
+        ...prev,
+        list: prev.list.filter((l) => l.id !== listId),
+      }));
+
+      await deleteListAction(boardId, listId);
+    },
+    [boardId],
+  );
+  // ---------------- Delete Task ----------------
+  const deleteTask = useCallback(
+    async (listId: string, taskId: string) => {
+      // Optimistic update
+      setBoard((prev) => ({
+        ...prev,
+        list: prev.list.map((l) =>
+          l.id === listId ? { ...l, tasks: l.tasks.filter((t) => t.id !== taskId) } : l,
+        ),
+      }));
+
+      await deleteTaskAction(boardId, listId, taskId);
+    },
+    [boardId],
+  );
+
   return (
     <main className="p-6 max-w-full">
       {/* Header */}
       <header className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">{board.title}</h1>
 
-        <Dialog open={isCreating} onOpenChange={setIsCreating}>
+        <Dialog open={isCreatingList} onOpenChange={setIsCreatingList}>
           <DialogTrigger asChild>
-            <Button onClick={() => setTargetListId(null)}>Add Task</Button>
+            <Button onClick={() => setIsCreatingList(true)}>Add List</Button>
           </DialogTrigger>
 
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
-              <DialogTitle>Create task</DialogTitle>
+              <DialogTitle>Create List</DialogTitle>
             </DialogHeader>
 
-            <CreateTaskForm
-              lists={lists}
-              selectedListId={targetListId ?? undefined}
-              onCreate={(listId, payload) => {
-                addTask(listId, payload);
-                setIsCreating(false);
+            <CreateListForm
+              onCreate={(title) => {
+                addList(title);
+                setIsCreatingList(false);
               }}
             />
           </DialogContent>
         </Dialog>
       </header>
+      {/* Create Task Dialog */}
+      <Dialog open={isCreatingTask} onOpenChange={setIsCreatingTask}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Create Card</DialogTitle>
+          </DialogHeader>
+
+          <CreateTaskForm
+            lists={lists}
+            selectedListId={targetListId ?? undefined}
+            onCreate={(listId, payload) => {
+              addTask(listId, payload);
+              setIsCreatingTask(false);
+            }}
+          />
+        </DialogContent>
+      </Dialog>
 
       {/* Task Drawer */}
       <Drawer open={isTaskOpen} onOpenChange={setIsTaskOpen}>
@@ -189,7 +276,7 @@ export default function BoardClient({ initialBoard }: { initialBoard: Board }) {
       {/* Lists */}
       <section className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide">
         {lists.map((list) => (
-          <div key={list.id} className="shrink-0" style={{ width: 320 }}>
+          <div key={list.id} className="shrink-0" style={{ width: 270 }}>
             <ListView
               list={list}
               onTaskClick={(task) => {
@@ -198,8 +285,10 @@ export default function BoardClient({ initialBoard }: { initialBoard: Board }) {
               }}
               onAddTaskClick={(listId) => {
                 setTargetListId(listId);
-                setIsCreating(true);
+                setIsCreatingTask(true);
               }}
+              onDeleteList={(listId) => deleteList(listId)}
+              onDeleteTask={(taskId) => deleteTask(list.id, taskId)}
             />
           </div>
         ))}
@@ -298,6 +387,37 @@ const CreateTaskForm = ({
       <div className="flex justify-end">
         <Button type="submit" disabled={disabled}>
           Create
+        </Button>
+      </div>
+    </form>
+  );
+};
+
+// ---------------------- Create List Form ----------------------
+const CreateListForm = ({ onCreate }: { onCreate: (title: string) => void }) => {
+  const [title, setTitle] = useState('');
+
+  const disabled = title.trim().length === 0;
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (!disabled) {
+          onCreate(title.trim());
+          setTitle('');
+        }
+      }}
+      className="space-y-4"
+    >
+      <div>
+        <Label htmlFor="list-title">List Title</Label>
+        <Input id="list-title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+      </div>
+
+      <div className="flex justify-end">
+        <Button type="submit" disabled={disabled}>
+          Create List
         </Button>
       </div>
     </form>

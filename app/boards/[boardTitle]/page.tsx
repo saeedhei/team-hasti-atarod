@@ -27,3 +27,16 @@ export default async function BoardPage({ params }: PageProps) {
     </main>
   );
 }
+
+/**interface PageProps {
+  params: {
+    boardTitle: string;
+  };
+}
+
+export default function BoardPage({ params }: PageProps) {
+  const { boardTitle } = params;
+
+  return <div>{boardTitle}</div>;
+}
+**/
