@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import type { Task, Priority } from './BoardClient';
+import type { Task } from '@/types/board';
+import type { Priority } from '@/types/board';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';

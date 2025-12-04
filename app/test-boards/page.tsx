@@ -39,6 +39,7 @@ function asBoard(doc: unknown): Board | null {
     type: 'board',
     title: candidate.title,
     description: typeof candidate.description === 'string' ? candidate.description : undefined,
+    list: Array.isArray(candidate.list) ? (candidate.list as any[]) : [],
   };
 }
 
@@ -55,6 +56,12 @@ async function createBoard(formData: FormData) {
       type: 'board',
       title: title.trim(),
       description: typeof description === 'string' ? description.trim() : undefined,
+      list: [
+        { id: 'backlog', title: 'Backlog', color: 'bg-slate-400', tasks: [] },
+        { id: 'todo', title: 'To Do', color: 'bg-sky-400', tasks: [] },
+        { id: 'inprogress', title: 'In Progress', color: 'bg-amber-400', tasks: [] },
+        { id: 'done', title: 'Completed', color: 'bg-emerald-400', tasks: [] },
+      ],
     } as Board);
     revalidatePath('/test-boards');
   } catch (err) {
