@@ -12,7 +12,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { Calendar, Clipboard, Clock, MonitorCog } from 'lucide-react';
+import { Calendar, Clipboard, Clock, ListTodoIcon, MonitorCog } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import logo from 'next/image';
@@ -39,6 +39,11 @@ const items = [
     title: 'Timesheet',
     url: '/',
     icon: Clock,
+  },
+  {
+    title: 'My Board',
+    url: '/Board-page-sidebar',
+    icon: ListTodoIcon,
   },
 ];
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {}

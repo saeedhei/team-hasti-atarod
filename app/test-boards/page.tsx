@@ -6,6 +6,22 @@ import type { Board } from '@/types/board';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Plus } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+
+function slugify(title: string) {
+  return title
+    .toLowerCase()
+    .replace(/ /g, '-')
+    .replace(/[^\w-]+/g, '');
+}
 
 // Conversion function without using any
 function asBoard(doc: unknown): Board | null {
@@ -30,13 +46,15 @@ function asBoard(doc: unknown): Board | null {
 async function createBoard(formData: FormData) {
   'use server';
   const title = formData.get('title');
+  const description = formData.get('description');
   if (typeof title !== 'string' || title.trim() === '') return;
 
   try {
     await boardsDB.insert({
-      _id: new Date().toISOString(),
+      _id: `${slugify(title.trim())}-${Math.random().toString(36).slice(2, 7)}`,
       type: 'board',
       title: title.trim(),
+      description: typeof description === 'string' ? description.trim() : undefined,
     } as Board);
     revalidatePath('/test-boards');
   } catch (err) {
@@ -85,53 +103,69 @@ export default async function BoardsPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-3xl font-bold">Your Boards</h1>
-
-      {errorMsg && <p className="text-red-500">{errorMsg}</p>}
-
-      <form action={createBoard} className="flex gap-2 items-center">
-        <Input
-          name="title"
-          placeholder="New board title"
-          required
-          minLength={1}
-          maxLength={100}
-          className="max-w-sm"
-        />
-        <Button type="submit">Create Board</Button>
-      </form>
-
-      {boards.length === 0 ? (
-        <p className="text-gray-500">No boards have been created yet.</p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {boards.map((board) => (
-            <Card key={board._id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <CardTitle className="flex justify-between items-center gap-4">
-                  <span className="truncate">{board.title}</span>
-                  <div className="flex gap-2">
-                    {/* Open button */}
-                    <Link href={`/boards/${board._id}`}>
-                      <Button variant="default" size="sm">
-                        Open
-                      </Button>
-                    </Link>
-                    <form action={deleteBoard.bind(null, board._id)}>
-                      <Button type="submit" variant="destructive" size="sm">
-                        Delete
-                      </Button>
-                    </form>
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-600">{board.description || 'No description'}</p>
-              </CardContent>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 min-h-36">
+        {/* Create Board Tile */}
+        <Dialog>
+          <DialogTrigger asChild>
+            <Card className="cursor-pointer flex items-center justify-center p-6 hover:shadow-lg transition">
+              <div className="flex items-center gap-2 text-lg font-medium text-gray-700">
+                <Plus className="h-5 w-5" /> <span>Create Board</span>
+              </div>
             </Card>
-          ))}
-        </div>
-      )}
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Create a new board</DialogTitle>
+            </DialogHeader>
+
+            <form action={createBoard} className="flex flex-col gap-4 mt-4">
+              <Input name="title" placeholder="Board title..." required minLength={1} />
+              <Textarea
+                name="description"
+                placeholder="Description..."
+                className="resize-none"
+                minLength={1}
+              />
+
+              <div className="flex justify-end gap-2">
+                <DialogTrigger asChild>
+                  <Button type="button" variant="outline">
+                    Cancel
+                  </Button>
+                </DialogTrigger>
+
+                <Button type="submit">Create</Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {boards.map((board) => (
+          <Card key={board._id} className="hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <CardTitle className="flex justify-between items-center gap-4">
+                <span className="truncate">{board.title}</span>
+                <div className="flex gap-2">
+                  {/* Open button */}
+                  <Link href={`/boards/${board._id}`}>
+                    <Button variant="default" size="sm">
+                      Open
+                    </Button>
+                  </Link>
+                  <form action={deleteBoard.bind(null, board._id)}>
+                    <Button type="submit" variant="destructive" size="sm">
+                      Delete
+                    </Button>
+                  </form>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-gray-600">{board.description || 'No description'}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }
