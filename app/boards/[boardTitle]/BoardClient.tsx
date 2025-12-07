@@ -411,7 +411,9 @@ const CreateListForm = ({ onCreate }: { onCreate: (title: string) => void }) => 
       className="space-y-4"
     >
       <div>
-        <Label htmlFor="list-title">List Title</Label>
+        <Label className="mb-1" htmlFor="list-title">
+          List Title
+        </Label>
         <Input id="list-title" value={title} onChange={(e) => setTitle(e.target.value)} required />
       </div>
 
