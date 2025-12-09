@@ -229,6 +229,9 @@ We avoid this in most cases because:
 **For this project:**
 
 ✔ We follow the **Promise-based Next.js 16 pattern**.
+
 ✔ We type all route params consistently.
+
 ✔ We fetch board data inside Server Components.
+
 ✔ Client Components receive only preloaded data.
