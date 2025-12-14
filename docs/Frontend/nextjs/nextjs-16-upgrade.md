@@ -211,3 +211,18 @@ These changes affect us the most:
 - **React Compiler** → better performance for our card-heavy UI
 - **Enhanced routing** → faster prefetching of board pages
 - **Turbopack** → significantly faster local development
+
+---
+
+**Params & Search Params Change (New in Next.js 15+)**
+
+Dynamic route parameters (`params`) and search parameters (`searchParams`) are now Promises instead of plain objects.
+This affects all dynamic pages in the Kanban project such as:
+
+```bash
+
+/boards/[boardTitle]
+```
+
+For a full explanation and usage examples, see:
+[Routing & Page Props Documentation](./routing-and-page-props.md)
