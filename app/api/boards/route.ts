@@ -23,6 +23,14 @@ export async function GET() {
     return NextResponse.json({ error: 'Failed to fetch boards' }, { status: 500 });
   }
 }
+function slugify(title: string) {
+  return title
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^\p{L}\p{N}_-]+/gu, '')
+    .replace(/-+/g, '-');
+}
 
 export async function POST(req: Request) {
   try {
@@ -39,6 +47,7 @@ export async function POST(req: Request) {
       _id: randomUUID(),
       type: 'board',
       title,
+      slug: slugify(title),
       description,
     };
 

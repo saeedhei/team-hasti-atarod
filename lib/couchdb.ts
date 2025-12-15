@@ -7,6 +7,7 @@ if (!process.env.COUCH_URL) {
 
 export const couch = nano(process.env.COUCH_URL);
 export const boardsDB = couch.db.use('kanban_test');
+export const db = couch.db.use('kanban_test');
 
 async function checkDatabaseConnection(retries = 5, delay = 2000) {
   for (let i = 0; i < retries; i++) {

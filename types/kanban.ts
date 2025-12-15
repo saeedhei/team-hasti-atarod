@@ -13,7 +13,7 @@ export type Task = {
   priority?: Priority;
   progress?: number;
 };
-export type Column = {
+export type List = {
   id: string;
   title: string;
   color?: string;
@@ -23,5 +23,5 @@ export type Column = {
 export type BoardUI = {
   id: string;
   title: string;
-  columns: Column[];
+  list: List[];
 };

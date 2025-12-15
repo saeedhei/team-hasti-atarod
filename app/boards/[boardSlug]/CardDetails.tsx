@@ -1,21 +1,22 @@
 'use client';
 
 import { useState } from 'react';
-import type { Task, Priority } from './BoardClient';
+import type { Card } from '@/types/card';
+import type { Priority } from '@/types/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 
-export function TaskDetails({ task, onClose }: { task: Task; onClose: () => void }) {
+export function CardDetails({ card, onClose }: { card: Card; onClose: () => void }) {
   // Local editable fields
-  const [title, setTitle] = useState(task.title);
-  const [description, setDescription] = useState(task.description ?? '');
-  const [priority, setPriority] = useState<Priority>(task.priority ?? 'low');
+  const [title, setTitle] = useState(card.title);
+  const [description, setDescription] = useState(card.description ?? '');
+  const [priority, setPriority] = useState<Priority>(card.priority ?? 'low');
 
   // Simple tag editing
-  const [tags, setTags] = useState(task.tags?.map((t) => t.label).join(', ') ?? '');
+  const [tags, setTags] = useState(card.tags?.map((t) => t.label).join(', ') ?? '');
 
   return (
     <div className="space-y-6">
