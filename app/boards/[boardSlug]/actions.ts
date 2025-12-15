@@ -1,7 +1,7 @@
 //app/boards/[boardSlug]/actions.ts
 'use server';
 
-import { db } from '@/lib/couchdb';
+import { kanbansDB } from '@/lib/couchdb';
 import { revalidatePath } from 'next/cache';
 import type { List } from '@/types/list';
 import type { Card } from '@/types/card';
@@ -10,7 +10,7 @@ import type { Card } from '@/types/card';
 
 export async function createCardAction(card: Card, boardSlug: string) {
   try {
-    await db.insert(card);
+    await kanbansDB.insert(card);
 
     revalidatePath(`/boards/${boardSlug}`);
   } catch (err) {
@@ -23,7 +23,7 @@ export async function createCardAction(card: Card, boardSlug: string) {
 
 export async function createListAction(list: List, boardSlug: string) {
   try {
-    await db.insert(list);
+    await kanbansDB.insert(list);
 
     revalidatePath(`/boards/$${boardSlug}`);
   } catch (err) {
@@ -35,8 +35,8 @@ export async function createListAction(list: List, boardSlug: string) {
 // ---------------------- Delete List ----------------------
 export async function deleteListAction(boardId: string, listId: string, boardSlug: string) {
   try {
-    const list = await db.get(listId);
-    await db.destroy(list._id, list._rev);
+    const list = await kanbansDB.get(listId);
+    await kanbansDB.destroy(list._id, list._rev);
 
     revalidatePath(`/boards/${boardSlug}`);
   } catch (err) {
@@ -50,8 +50,8 @@ export async function deleteListAction(boardId: string, listId: string, boardSlu
 
 export async function deleteCardAction(boardId: string, cardId: string, boardSlug: string) {
   try {
-    const card = await db.get(cardId);
-    await db.destroy(card._id, card._rev);
+    const card = await kanbansDB.get(cardId);
+    await kanbansDB.destroy(card._id, card._rev);
 
     revalidatePath(`/boards/${boardSlug}`);
   } catch (err) {

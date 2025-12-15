@@ -1,7 +1,7 @@
 // app/api/boards/route.ts
 // GET (board list) + POST (create board)
 import { NextResponse } from 'next/server';
-import { boardsDB } from '@/lib/couchdb';
+import { kanbansDB } from '@/lib/couchdb';
 import type { Board } from '@/types/board';
 import type { DocumentListResponse } from 'nano';
 import { createBoardSchema } from '@/validations/board';
@@ -11,7 +11,7 @@ import { generateSlug } from '@/lib/slug';
 export async function GET() {
   try {
     // nano: list() returns docs with type `unknown` instead of Board
-    const raw = await boardsDB.list({ include_docs: true });
+    const raw = await kanbansDB.list({ include_docs: true });
 
     // Let TypeScript know that row.doc is a Board
     const data = raw as DocumentListResponse<Board>;
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
       description,
     };
 
-    const result = await boardsDB.insert(board);
+    const result = await kanbansDB.insert(board);
 
     return NextResponse.json({ message: 'Board created', id: result.id }, { status: 201 });
   } catch (err) {

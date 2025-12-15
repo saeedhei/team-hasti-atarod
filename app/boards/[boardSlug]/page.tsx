@@ -1,5 +1,5 @@
 // app/boards/[boardTitle]/page.tsx
-import { db } from '@/lib/couchdb';
+import { kanbansDB } from '@/lib/couchdb';
 import BoardClient from './BoardClient';
 import type { Board } from '@/types/board';
 import type { List } from '@/types/list';
@@ -12,7 +12,7 @@ type PageProps = {
 export default async function BoardPage({ params }: PageProps) {
   const { boardSlug } = await params;
 
-  const boardResult = await db.find({
+  const boardResult = await kanbansDB.find({
     selector: {
       type: 'board',
       slug: boardSlug,
@@ -26,10 +26,10 @@ export default async function BoardPage({ params }: PageProps) {
   const board = boardResult.docs[0] as Board;
 
   const [listResult, cardResult] = await Promise.all([
-    db.find({
+    kanbansDB.find({
       selector: { type: 'list', boardId: board._id },
     }),
-    db.find({
+    kanbansDB.find({
       selector: { type: 'card', boardId: board._id },
     }),
   ]);

@@ -1,7 +1,7 @@
 // app/test-boards/page.tsx
 import Link from 'next/link';
 import { revalidatePath } from 'next/cache';
-import { boardsDB } from '@/lib/couchdb';
+import { kanbansDB } from '@/lib/couchdb';
 import type { Board } from '@/types/board';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -49,7 +49,7 @@ async function createBoard(formData: FormData) {
   const slug = generateSlug(title);
 
   try {
-    await boardsDB.insert({
+    await kanbansDB.insert({
       _id: `board:${crypto.randomUUID()}`,
       type: 'board',
       title: title.trim(),
@@ -66,11 +66,11 @@ async function createBoard(formData: FormData) {
 async function deleteBoard(id: string) {
   'use server';
   try {
-    const doc = await boardsDB.get(id);
+    const doc = await kanbansDB.get(id);
     if (doc && typeof doc === 'object') {
       const candidate = doc as unknown as Record<string, unknown>;
       if (typeof candidate._rev === 'string') {
-        await boardsDB.destroy(id, candidate._rev);
+        await kanbansDB.destroy(id, candidate._rev);
       }
     }
   } catch (error) {
@@ -89,7 +89,7 @@ export default async function BoardsPage() {
   let errorMsg: string | null = null;
 
   try {
-    const result = await boardsDB.list({ include_docs: true });
+    const result = await kanbansDB.list({ include_docs: true });
 
     const rawDocs = result.rows.map((row) => row.doc as unknown);
 

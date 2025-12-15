@@ -2,7 +2,7 @@
 // GET / PUT / DELETE for a single board
 
 import { NextResponse } from 'next/server';
-import { boardsDB } from '@/lib/couchdb';
+import { kanbansDB } from '@/lib/couchdb';
 import type { Board } from '@/types/board';
 import { updateBoardSchema } from '@/validations/board';
 
@@ -46,7 +46,7 @@ function getMessage(err: unknown): string {
 // ---------- GET /api/boards/[id] ----------
 export async function GET(_: Request, { params }: Params) {
   try {
-    const board = (await boardsDB.get(params.id)) as Board;
+    const board = (await kanbansDB.get(params.id)) as Board;
     return NextResponse.json({ board });
   } catch (error: unknown) {
     return NextResponse.json({ error: getMessage(error) }, { status: getStatus(error) });
@@ -63,14 +63,14 @@ export async function PUT(req: Request, { params }: Params) {
       return NextResponse.json({ errors: parsed.error.flatten() }, { status: 400 });
     }
 
-    const existing = (await boardsDB.get(params.id)) as Board;
+    const existing = (await kanbansDB.get(params.id)) as Board;
 
     const updated: Board = {
       ...existing,
       ...parsed.data,
     };
 
-    const result = await boardsDB.insert(updated);
+    const result = await kanbansDB.insert(updated);
 
     return NextResponse.json({
       message: 'Board updated',
@@ -84,9 +84,9 @@ export async function PUT(req: Request, { params }: Params) {
 // ---------- DELETE /api/boards/[id] ----------
 export async function DELETE(_: Request, { params }: Params) {
   try {
-    const existing = (await boardsDB.get(params.id)) as Board;
+    const existing = (await kanbansDB.get(params.id)) as Board;
 
-    const result = await boardsDB.destroy(existing._id, existing._rev!);
+    const result = await kanbansDB.destroy(existing._id, existing._rev!);
 
     return NextResponse.json({
       message: 'Board deleted',
