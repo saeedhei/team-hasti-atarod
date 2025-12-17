@@ -48,6 +48,6 @@ export async function deleteCardAction(
   listId: string,
   boardSlug: string,
 ) {
-  await deleteList(listId);
+  await deleteCard(cardId);
   revalidatePath(`/boards/${boardSlug}`);
 }
