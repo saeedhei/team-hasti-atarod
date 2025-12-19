@@ -2,9 +2,9 @@
 // GET + POST lists for a board
 
 import { NextResponse } from 'next/server';
-import { createList } from '@/lib/domain/lists';
+import { kanbansDB } from '@/lib/couchdb';
+import type { List } from '@/types/list';
 import { createListSchema } from '@/validations/list';
-import { findListsByBoard } from '@/lib/repos/lists.repo';
 
 interface Params {
   params: { boardId: string };
@@ -14,9 +14,14 @@ interface Params {
 
 export async function GET(_: Request, { params }: Params) {
   try {
-    const lists = await findListsByBoard(params.boardId);
+    const result = await kanbansDB.find({
+      selector: {
+        type: 'list',
+        boardId: params.boardId,
+      },
+    });
 
-    return NextResponse.json({ lists });
+    return NextResponse.json({ lists: result.docs as List[] });
   } catch (err) {
     console.error('GET Lists Error:', err);
     return NextResponse.json({ error: 'Failed to fetch lists' }, { status: 500 });
@@ -34,15 +39,16 @@ export async function POST(req: Request, { params }: Params) {
       return NextResponse.json({ errors: parsed.error.flatten() }, { status: 400 });
     }
 
-    await createList(
-      {
-        title: parsed.data.title,
-        position: parsed.data.position ?? 0,
-        color: parsed.data.color,
-      },
+    const list: List = {
+      _id: `list:${crypto.randomUUID()}`,
+      type: 'list',
+      boardId: params.boardId,
+      title: parsed.data.title,
+      position: parsed.data.position ?? 0,
+      color: parsed.data.color,
+    };
 
-      params.boardId,
-    );
+    await kanbansDB.insert(list);
 
     return NextResponse.json({ message: 'List created' }, { status: 201 });
   } catch (err) {

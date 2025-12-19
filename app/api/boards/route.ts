@@ -1,23 +1,25 @@
 // app/api/boards/route.ts
 // GET (board list) + POST (create board)
 import { NextResponse } from 'next/server';
+import { kanbansDB } from '@/lib/couchdb';
+import type { Board } from '@/types/board';
 import { createBoardSchema } from '@/validations/board';
+import { randomUUID } from 'crypto';
 import { generateSlug } from '@/lib/slug';
-import { findAllBoards, createBoardDoc } from '@/lib/repos/boards.repo';
 
-// ---------- GET ----------
 export async function GET() {
   try {
-    const boards = await findAllBoards();
+    const result = await kanbansDB.find({
+      selector: { type: 'board' },
+    });
 
-    return NextResponse.json({ boards });
+    return NextResponse.json({ boards: result.docs as Board[] });
   } catch (err) {
     console.error('GET Boards Error:', err);
     return NextResponse.json({ error: 'Failed to fetch boards' }, { status: 500 });
   }
 }
 
-// ---------- POST ----------
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -30,11 +32,15 @@ export async function POST(req: Request) {
     const { title, description } = parsed.data;
     const slug = generateSlug(title);
 
-    const result = await createBoardDoc({
+    const board: Board = {
+      _id: `board:${randomUUID()}`,
+      type: 'board',
       title,
       slug,
       description,
-    });
+    };
+
+    const result = await kanbansDB.insert(board);
 
     return NextResponse.json({ message: 'Board created', id: result.id }, { status: 201 });
   } catch (err) {

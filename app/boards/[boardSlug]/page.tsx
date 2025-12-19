@@ -1,8 +1,9 @@
 // app/boards/[boardSlug]/page.tsx
-import { findBoardBySlug } from '@/lib/repos/boards.repo';
-import { findListsByBoard } from '@/lib/repos/lists.repo';
-import { findCardsByBoard } from '@/lib/repos/cards.repo';
+import { kanbansDB } from '@/lib/couchdb';
 import BoardClient from './BoardClient';
+import type { Board } from '@/types/board';
+import type { List } from '@/types/list';
+import type { Card } from '@/types/card';
 
 type PageProps = {
   params: Promise<{ boardSlug: string }>;
@@ -11,22 +12,30 @@ type PageProps = {
 export default async function BoardPage({ params }: PageProps) {
   const { boardSlug } = await params;
 
-  const board = await findBoardBySlug(boardSlug);
+  const boardResult = await kanbansDB.find({
+    selector: {
+      type: 'board',
+      slug: boardSlug,
+    },
+    limit: 1,
+  });
 
-  if (!board) {
+  if (boardResult.docs.length === 0) {
     return <div className="p-6">Board not found</div>;
   }
+  const board = boardResult.docs[0] as Board;
 
-  try {
-    const [lists, cards] = await Promise.all([
-      findListsByBoard(board._id),
-      findCardsByBoard(board._id),
-    ]);
+  const [listResult, cardResult] = await Promise.all([
+    kanbansDB.find({
+      selector: { type: 'list', boardId: board._id },
+    }),
+    kanbansDB.find({
+      selector: { type: 'card', boardId: board._id },
+    }),
+  ]);
 
-    return <BoardClient initialBoard={board} initialLists={lists} initialCards={cards} />;
-  } catch (err) {
-    console.error('Failed to load board data:', err);
+  const lists = listResult.docs as List[];
+  const cards = cardResult.docs as Card[];
 
-    return <div className="p-6 text-red-500">Failed to load board data</div>;
-  }
+  return <BoardClient initialBoard={board} initialLists={lists} initialCards={cards} />;
 }

@@ -1,9 +1,11 @@
 // app/boards/page.tsx
 import Link from 'next/link';
 import { revalidatePath } from 'next/cache';
-import type { Board } from '@/types/board';
+import { kanbansDB } from '@/lib/couchdb';
 import { generateSlug } from '@/lib/slug';
-import { findAllBoards, createBoardDoc, deleteBoardDoc } from '@/lib/repos/boards.repo';
+import { randomUUID } from 'crypto';
+import type { Board } from '@/types/board';
+import { createBoardSchema } from '@/validations/board';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,37 +23,42 @@ import {
 // Server Action: create board
 async function createBoard(formData: FormData) {
   'use server';
-  const title = formData.get('title');
-  const description = formData.get('description');
-  if (typeof title !== 'string' || title.trim() === '') return;
 
-  const slug = generateSlug(title);
+  const rawData = {
+    title: formData.get('title'),
+    description: formData.get('description'),
+  };
 
-  try {
-    await createBoardDoc({
-      title: title.trim(),
-      slug,
-      description: typeof description === 'string' ? description.trim() : undefined,
-    });
-    revalidatePath('/boards');
-  } catch (err) {
-    console.error('Failed to create board:', err);
-  }
+  const data = createBoardSchema.parse({
+    title: typeof rawData.title === 'string' ? rawData.title : '',
+    description:
+      typeof rawData.description === 'string' && rawData.description.trim() !== ''
+        ? rawData.description.trim()
+        : undefined,
+  });
+  const board: Board = {
+    _id: `board:${randomUUID()}`,
+    type: 'board',
+    title: data.title.trim(),
+    slug: generateSlug(data.title),
+    description: data.description,
+  };
+
+  await kanbansDB.insert(board);
+  revalidatePath('/boards');
 }
 
 // Server Action: delete board
-async function deleteBoard(id: string) {
+async function deleteBoard(boardId: string) {
   'use server';
-  try {
-    await deleteBoardDoc(id);
-  } catch (error) {
-    const err = error as { error?: string };
-    if (err.error !== 'not_found') {
-      console.error('Delete failed:', error);
-    }
-  } finally {
-    revalidatePath('/boards');
+  const board = (await kanbansDB.get(boardId)) as Board;
+
+  if (!board._rev) {
+    throw new Error('Missing document revision');
   }
+
+  await kanbansDB.destroy(board._id, board._rev);
+  revalidatePath('/boards');
 }
 
 // Main page — Server Component
@@ -59,10 +66,11 @@ export default async function BoardsPage() {
   let boards: Board[] = [];
 
   try {
-    boards = await findAllBoards();
+    const result = await kanbansDB.find({ selector: { type: 'board' } });
+
+    boards = result.docs as Board[];
   } catch (err) {
     console.error('Failed to load boards:', err);
-    return <div className="p-6 text-red-500">Failed to load boards</div>;
   }
 
   return (

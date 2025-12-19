@@ -2,9 +2,9 @@
 // GET / PUT / DELETE a single list in a board
 
 import { NextResponse } from 'next/server';
+import { kanbansDB } from '@/lib/couchdb';
+import type { List } from '@/types/list';
 import { updateListSchema } from '@/validations/list';
-import { updateList, deleteList } from '@/lib/domain/lists';
-import { findListsByBoard } from '@/lib/repos/lists.repo';
 
 // ---------- Types ----------
 interface Params {
@@ -14,18 +14,49 @@ interface Params {
   };
 }
 
+interface NanoError {
+  statusCode?: number;
+  error?: string;
+  message?: string;
+  reason?: string;
+}
+
+// ---------- Type Guards ----------
+function isNanoError(err: unknown): err is NanoError {
+  return (
+    typeof err === 'object' &&
+    err !== null &&
+    ('statusCode' in err || 'error' in err || 'reason' in err || 'message' in err)
+  );
+}
+
+function getStatus(err: unknown): number {
+  if (isNanoError(err) && typeof err.statusCode === 'number') {
+    return err.statusCode;
+  }
+  return 500;
+}
+
+function getMessage(err: unknown): string {
+  if (isNanoError(err)) {
+    if (typeof err.reason === 'string') return err.reason;
+    if (typeof err.message === 'string') return err.message;
+    if (typeof err.error === 'string') return err.error;
+  }
+  return 'Unknown error';
+}
+
 // ---------- GET ----------
 export async function GET(_: Request, { params }: Params) {
   try {
-    const lists = await findListsByBoard(params.boardId);
-    const list = lists.find((l) => l._id === params.listId);
-
-    if (!list) {
-      return NextResponse.json({ error: 'List not found in this board' }, { status: 404 });
+    const list = (await kanbansDB.get(params.listId)) as List;
+    // The list belongs to the board in the URL
+    if (list.boardId !== params.boardId) {
+      return NextResponse.json({ error: 'List does not belong to this board' }, { status: 404 });
     }
     return NextResponse.json({ list });
-  } catch {
-    return NextResponse.json({ error: 'Failed to fetch list' }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json({ error: getMessage(error) }, { status: getStatus(error) });
   }
 }
 
@@ -39,20 +70,43 @@ export async function PUT(req: Request, { params }: Params) {
       return NextResponse.json({ errors: parsed.error.flatten() }, { status: 400 });
     }
 
-    await updateList(params.listId, parsed.data);
+    const existing = (await kanbansDB.get(params.listId)) as List;
+    //  Enforce board scope
+    if (existing.boardId !== params.boardId) {
+      return NextResponse.json({ error: 'List does not belong to this board' }, { status: 404 });
+    }
 
-    return NextResponse.json({ message: 'List updated' });
-  } catch {
-    return NextResponse.json({ error: 'Failed to update list' }, { status: 500 });
+    const updated: List = {
+      ...existing,
+      ...parsed.data,
+    };
+    const result = await kanbansDB.insert(updated);
+    return NextResponse.json({
+      message: 'List updated',
+      id: result.id,
+    });
+  } catch (error: unknown) {
+    return NextResponse.json({ error: getMessage(error) }, { status: getStatus(error) });
   }
 }
+
 // ---------- DELETE ----------
 export async function DELETE(_: Request, { params }: Params) {
   try {
-    await deleteList(params.listId);
+    const existing = (await kanbansDB.get(params.listId)) as List;
 
-    return NextResponse.json({ message: 'List deleted' });
-  } catch {
-    return NextResponse.json({ error: 'Failed to delete list' }, { status: 500 });
+    // Enforce board scope
+    if (existing.boardId !== params.boardId) {
+      return NextResponse.json({ error: 'List does not belong to this board' }, { status: 404 });
+    }
+
+    const result = await kanbansDB.destroy(existing._id, existing._rev!);
+
+    return NextResponse.json({
+      message: 'List deleted',
+      id: result.id,
+    });
+  } catch (error: unknown) {
+    return NextResponse.json({ error: getMessage(error) }, { status: getStatus(error) });
   }
 }
