@@ -3,22 +3,17 @@
 import { NextResponse } from 'next/server';
 import { kanbansDB } from '@/lib/couchdb';
 import type { Board } from '@/types/board';
-import type { DocumentListResponse } from 'nano';
 import { createBoardSchema } from '@/validations/board';
 import { randomUUID } from 'crypto';
 import { generateSlug } from '@/lib/slug';
 
 export async function GET() {
   try {
-    // nano: list() returns docs with type `unknown` instead of Board
-    const raw = await kanbansDB.list({ include_docs: true });
+    const result = await kanbansDB.find({
+      selector: { type: 'board' },
+    });
 
-    // Let TypeScript know that row.doc is a Board
-    const data = raw as DocumentListResponse<Board>;
-
-    const boards = data.rows.flatMap((row) => (row.doc ? [row.doc] : []));
-
-    return NextResponse.json({ boards });
+    return NextResponse.json({ boards: result.docs as Board[] });
   } catch (err) {
     console.error('GET Boards Error:', err);
     return NextResponse.json({ error: 'Failed to fetch boards' }, { status: 500 });

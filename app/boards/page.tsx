@@ -1,15 +1,17 @@
-// app/test-boards/page.tsx
+// app/boards/page.tsx
 import Link from 'next/link';
 import { revalidatePath } from 'next/cache';
 import { kanbansDB } from '@/lib/couchdb';
+import { generateSlug } from '@/lib/slug';
+import { randomUUID } from 'crypto';
 import type { Board } from '@/types/board';
+import { createBoardSchema } from '@/validations/board';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Plus } from 'lucide-react';
-import { generateSlug } from '@/lib/slug';
 import {
   Dialog,
   DialogContent,
@@ -18,87 +20,57 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 
-// Conversion function without using any
-function asBoard(doc: unknown): Board | null {
-  if (!doc || typeof doc !== 'object') return null;
-
-  const candidate = doc as Record<string, unknown>;
-
-  if (typeof candidate._id !== 'string') return null;
-  if (candidate.type !== 'board') return null;
-  if (typeof candidate.title !== 'string' || candidate.title.trim() === '') return null;
-  if (typeof candidate.slug !== 'string' || candidate.slug.trim() === '') return null;
-
-  return {
-    _id: candidate._id,
-    _rev: typeof candidate._rev === 'string' ? candidate._rev : undefined,
-    type: 'board',
-    title: candidate.title,
-    slug: candidate.slug,
-    description: typeof candidate.description === 'string' ? candidate.description : undefined,
-  };
-}
-
 // Server Action: create board
 async function createBoard(formData: FormData) {
   'use server';
-  const title = formData.get('title');
-  const description = formData.get('description');
-  if (typeof title !== 'string' || title.trim() === '') return;
 
-  const slug = generateSlug(title);
+  const rawData = {
+    title: formData.get('title'),
+    description: formData.get('description'),
+  };
 
-  try {
-    await kanbansDB.insert({
-      _id: `board:${crypto.randomUUID()}`,
-      type: 'board',
-      title: title.trim(),
-      slug,
-      description: typeof description === 'string' ? description.trim() : undefined,
-    } as Board);
-    revalidatePath('/boards');
-  } catch (err) {
-    console.error('Failed to create board:', err);
-  }
+  const data = createBoardSchema.parse({
+    title: typeof rawData.title === 'string' ? rawData.title : '',
+    description:
+      typeof rawData.description === 'string' && rawData.description.trim() !== ''
+        ? rawData.description.trim()
+        : undefined,
+  });
+  const board: Board = {
+    _id: `board:${randomUUID()}`,
+    type: 'board',
+    title: data.title.trim(),
+    slug: generateSlug(data.title),
+    description: data.description,
+  };
+
+  await kanbansDB.insert(board);
+  revalidatePath('/boards');
 }
 
 // Server Action: delete board
-async function deleteBoard(id: string) {
+async function deleteBoard(boardId: string) {
   'use server';
-  try {
-    const doc = await kanbansDB.get(id);
-    if (doc && typeof doc === 'object') {
-      const candidate = doc as unknown as Record<string, unknown>;
-      if (typeof candidate._rev === 'string') {
-        await kanbansDB.destroy(id, candidate._rev);
-      }
-    }
-  } catch (error) {
-    const err = error as { error?: string };
-    if (err.error !== 'not_found') {
-      console.error('Delete failed:', error);
-    }
-  } finally {
-    revalidatePath('/boards');
+  const board = (await kanbansDB.get(boardId)) as Board;
+
+  if (!board._rev) {
+    throw new Error('Missing document revision');
   }
+
+  await kanbansDB.destroy(board._id, board._rev);
+  revalidatePath('/boards');
 }
 
 // Main page — Server Component
 export default async function BoardsPage() {
   let boards: Board[] = [];
-  let errorMsg: string | null = null;
 
   try {
-    const result = await kanbansDB.list({ include_docs: true });
+    const result = await kanbansDB.find({ selector: { type: 'board' } });
 
-    const rawDocs = result.rows.map((row) => row.doc as unknown);
-
-    const validBoards = rawDocs.map(asBoard).filter((board): board is Board => board !== null);
-
-    boards = validBoards;
+    boards = result.docs as Board[];
   } catch (err) {
     console.error('Failed to load boards:', err);
-    errorMsg = 'Failed to load boards';
   }
 
   return (

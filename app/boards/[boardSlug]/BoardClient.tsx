@@ -155,6 +155,9 @@ export default function BoardClient({
   const [isCardOpen, setIsCardOpen] = useState(false);
   const [targetListId, setTargetListId] = useState<string | null>(null);
 
+  //nsures list order is deterministic and stable after refresh
+  const orderedLists = useMemo(() => [...lists].sort((a, b) => a.position - b.position), [lists]);
+
   const cardsByList = useMemo(() => {
     const map: Record<string, Card[]> = {};
     for (const card of cards) {
@@ -169,36 +172,66 @@ export default function BoardClient({
     listId: string,
     payload: Pick<Card, 'title' | 'description' | 'priority'>,
   ) => {
-    const card: Card = {
-      _id: `card:${crypto.randomUUID()}`,
-      type: 'card',
-      boardId: board._id,
-      listId,
-      title: payload.title,
-      description: payload.description,
-      priority: payload.priority ?? 'low',
-      position: cards.filter((c) => c.listId === listId).length,
-    };
-
+    const tempCardId = `card:temp-${crypto.randomUUID()}`;
+    const position = cards.filter((c) => c.listId === listId).length;
     // Optimistic UI update
-    setCards((prev) => [...prev, card]);
-    await createCardAction(card, board.slug);
+    setCards((prev) => [
+      ...prev,
+      {
+        _id: tempCardId,
+        type: 'card',
+        boardId: board._id,
+        listId,
+        title: payload.title,
+        description: payload.description,
+        priority: payload.priority ?? 'low',
+        position,
+      },
+    ]);
+
+    const realCard = await createCardAction(
+      {
+        title: payload.title,
+        description: payload.description,
+        priority: payload.priority ?? 'low',
+        position,
+      },
+      board._id,
+      listId,
+      board.slug,
+    );
+    // Reconcile temp to real
+    setCards((prev) => prev.map((c) => (c._id === tempCardId ? realCard : c)));
   };
 
   // ---------------- Add List ----------------
   const addList = async (title: string) => {
-    const list: List = {
-      _id: `list:${crypto.randomUUID()}`,
-      type: 'list',
-      boardId: board._id,
-      title,
-      position: lists.length,
-      color: 'bg-slate-300',
-    };
-
+    const tempListId = `list:temp-${crypto.randomUUID()}`;
     // Optimistic UI update
-    setLists((prev) => [...prev, list]);
-    await createListAction(list, board.slug);
+    setLists((prev) => {
+      const position = prev.length;
+      return [
+        ...prev,
+        {
+          _id: tempListId,
+          type: 'list',
+          boardId: board._id,
+          title,
+          position,
+          color: 'bg-slate-300',
+        },
+      ];
+    });
+    const realList = await createListAction(
+      {
+        title,
+        color: 'bg-slate-300',
+      },
+      board._id,
+      board.slug,
+    );
+    // Reconcile temp to real
+    setLists((prev) => prev.map((l) => (l._id === tempListId ? realList : l)));
   };
 
   // ---------------- Delete List ----------------
@@ -210,9 +243,13 @@ export default function BoardClient({
   };
   // ---------------- Delete Card ----------------
   const deleteCard = async (cardId: string) => {
+    const card = cards.find((c) => c._id === cardId);
+    if (!card) return;
+
     // Optimistic update
     setCards((prev) => prev.filter((c) => c._id !== cardId));
-    await deleteCardAction(board._id, cardId, board.slug);
+
+    await deleteCardAction(board._id, cardId, card.listId, board.slug);
   };
 
   return (
@@ -267,7 +304,7 @@ export default function BoardClient({
 
       {/* Lists */}
       <section className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide">
-        {lists.map((list) => (
+        {orderedLists.map((list) => (
           <div key={list._id} className="shrink-0" style={{ width: 270 }}>
             <ListView
               list={list}

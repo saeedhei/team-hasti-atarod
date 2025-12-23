@@ -1,4 +1,4 @@
-// app/boards/[boardTitle]/page.tsx
+// app/boards/[boardSlug]/page.tsx
 import { kanbansDB } from '@/lib/couchdb';
 import BoardClient from './BoardClient';
 import type { Board } from '@/types/board';
