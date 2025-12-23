@@ -41,12 +41,18 @@ export async function createCardAction(
 
 export async function createListAction(payload: unknown, boardId: string, boardSlug: string) {
   const data = createListSchema.parse(payload);
+
+  // Fetch existing lists for this board to compute the next stable position.
+  const existing = await kanbansDB.find({
+    selector: { type: 'list', boardId },
+  });
+  const position = existing.docs.length;
   const list: List = {
     _id: `list:${randomUUID()}`,
     type: 'list',
     boardId,
     title: data.title,
-    position: data.position ?? 0,
+    position,
     color: data.color,
   };
 
