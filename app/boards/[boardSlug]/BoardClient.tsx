@@ -169,41 +169,46 @@ export default function BoardClient({
     listId: string,
     payload: Pick<Card, 'title' | 'description' | 'priority'>,
   ) => {
+    const tempCardId = `card:temp-${crypto.randomUUID()}`;
+    const position = cards.filter((c) => c.listId === listId).length;
     // Optimistic UI update
     setCards((prev) => [
       ...prev,
       {
-        _id: `card:temp-${crypto.randomUUID()}`,
+        _id: tempCardId,
         type: 'card',
         boardId: board._id,
         listId,
         title: payload.title,
         description: payload.description,
         priority: payload.priority ?? 'low',
-        position: cards.filter((c) => c.listId === listId).length,
+        position,
       },
     ]);
 
-    await createCardAction(
+    const realCard = await createCardAction(
       {
         title: payload.title,
         description: payload.description,
         priority: payload.priority ?? 'low',
-        position: cards.filter((c) => c.listId === listId).length,
+        position,
       },
       board._id,
       listId,
       board.slug,
     );
+    // Reconcile temp to real
+    setCards((prev) => prev.map((c) => (c._id === tempCardId ? realCard : c)));
   };
 
   // ---------------- Add List ----------------
   const addList = async (title: string) => {
+    const tempListId = `list:temp-${crypto.randomUUID()}`;
     // Optimistic UI update
     setLists((prev) => [
       ...prev,
       {
-        _id: `list:temp-${crypto.randomUUID()}`,
+        _id: tempListId,
         type: 'list',
         boardId: board._id,
         title,
@@ -211,8 +216,7 @@ export default function BoardClient({
         color: 'bg-slate-300',
       },
     ]);
-
-    await createListAction(
+    const realList = await createListAction(
       {
         title,
         position: lists.length,
@@ -221,6 +225,8 @@ export default function BoardClient({
       board._id,
       board.slug,
     );
+    // Reconcile temp to real
+    setLists((prev) => prev.map((l) => (l._id === tempListId ? realList : l)));
   };
 
   // ---------------- Delete List ----------------

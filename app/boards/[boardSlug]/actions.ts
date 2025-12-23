@@ -1,6 +1,7 @@
 //app/boards/[boardSlug]/actions.ts
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { randomUUID } from 'crypto';
 import { kanbansDB } from '@/lib/couchdb';
 import { createCardSchema } from '@/validations/card';
@@ -33,6 +34,7 @@ export async function createCardAction(
     assignee: data.assignee,
   };
   await kanbansDB.insert(card);
+  return card;
 }
 
 // ---------------------- Create List ----------------------
@@ -49,6 +51,7 @@ export async function createListAction(payload: unknown, boardId: string, boardS
   };
 
   await kanbansDB.insert(list);
+  return list;
 }
 
 // ---------------------- Delete List ----------------------

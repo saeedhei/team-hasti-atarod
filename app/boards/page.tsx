@@ -58,7 +58,7 @@ async function deleteBoard(boardId: string) {
   }
 
   await kanbansDB.destroy(board._id, board._rev);
-  //revalidatePath('/boards');
+  revalidatePath('/boards');
 }
 
 // Main page — Server Component
