@@ -39,13 +39,16 @@ export async function POST(req: Request, { params }: Params) {
       return NextResponse.json({ errors: parsed.error.flatten() }, { status: 400 });
     }
 
+    const now = new Date().toISOString();
     const list: List = {
       _id: `list:${crypto.randomUUID()}`,
       type: 'list',
       boardId: params.boardId,
       title: parsed.data.title,
-      position: parsed.data.position ?? 0,
       color: parsed.data.color,
+      //ordering via DB
+      createdAt: now,
+      updatedAt: now,
     };
 
     await kanbansDB.insert(list);

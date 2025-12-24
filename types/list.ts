@@ -5,11 +5,12 @@ import type { MaybeDocument } from 'nano';
 export interface List extends MaybeDocument {
   _id: string;
   _rev?: string;
-
   type: 'list';
 
   boardId: string;
   title: string;
-  position: number;
   color?: string;
+
+  createdAt: string;
+  updatedAt: string;
 }

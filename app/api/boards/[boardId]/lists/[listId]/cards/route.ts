@@ -41,6 +41,7 @@ export async function POST(req: Request, { params }: Params) {
       return NextResponse.json({ errors: parsed.error.flatten() }, { status: 400 });
     }
 
+    const now = new Date().toISOString();
     const card: Card = {
       _id: `card:${crypto.randomUUID()}`,
       type: 'card',
@@ -49,8 +50,9 @@ export async function POST(req: Request, { params }: Params) {
       title: parsed.data.title,
       description: parsed.data.description,
       priority: parsed.data.priority,
-      position: parsed.data.position ?? 0,
-      createdAt: new Date().toISOString(),
+      //ordering via DB
+      createdAt: now,
+      updatedAt: now,
     };
 
     await kanbansDB.insert(card);

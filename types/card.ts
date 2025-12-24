@@ -7,7 +7,6 @@ export type Priority = 'low' | 'medium' | 'high';
 export interface Card extends MaybeDocument {
   _id: string;
   _rev?: string;
-
   type: 'card';
 
   boardId: string;
@@ -16,9 +15,11 @@ export interface Card extends MaybeDocument {
   title: string;
   description?: string;
   priority?: Priority;
-  position: number;
-  createdAt?: string;
+
   tags?: { id: string; label: string }[];
   progress?: number;
   assignee?: { id: string; name: string; initials?: string };
+
+  createdAt: string;
+  updatedAt: string;
 }

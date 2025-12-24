@@ -155,14 +155,16 @@ export default function BoardClient({
   const [isCardOpen, setIsCardOpen] = useState(false);
   const [targetListId, setTargetListId] = useState<string | null>(null);
 
-  //nsures list order is deterministic and stable after refresh
-  const orderedLists = useMemo(() => [...lists].sort((a, b) => a.position - b.position), [lists]);
-
+  //Sort cards per list by createdAt
   const cardsByList = useMemo(() => {
     const map: Record<string, Card[]> = {};
     for (const card of cards) {
       if (!map[card.listId]) map[card.listId] = [];
       map[card.listId].push(card);
+    }
+    // After grouping cards by list, re-assert the order defined by the DB (createdAt asc)
+    for (const listId in map) {
+      map[listId].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     }
     return map;
   }, [cards]);
@@ -173,7 +175,8 @@ export default function BoardClient({
     payload: Pick<Card, 'title' | 'description' | 'priority'>,
   ) => {
     const tempCardId = `card:temp-${crypto.randomUUID()}`;
-    const position = cards.filter((c) => c.listId === listId).length;
+    const now = new Date().toISOString();
+
     // Optimistic UI update
     setCards((prev) => [
       ...prev,
@@ -185,7 +188,8 @@ export default function BoardClient({
         title: payload.title,
         description: payload.description,
         priority: payload.priority ?? 'low',
-        position,
+        createdAt: now,
+        updatedAt: now,
       },
     ]);
 
@@ -194,7 +198,6 @@ export default function BoardClient({
         title: payload.title,
         description: payload.description,
         priority: payload.priority ?? 'low',
-        position,
       },
       board._id,
       listId,
@@ -207,21 +210,20 @@ export default function BoardClient({
   // ---------------- Add List ----------------
   const addList = async (title: string) => {
     const tempListId = `list:temp-${crypto.randomUUID()}`;
+    const now = new Date().toISOString();
     // Optimistic UI update
-    setLists((prev) => {
-      const position = prev.length;
-      return [
-        ...prev,
-        {
-          _id: tempListId,
-          type: 'list',
-          boardId: board._id,
-          title,
-          position,
-          color: 'bg-slate-300',
-        },
-      ];
-    });
+    setLists((prev) => [
+      ...prev,
+      {
+        _id: tempListId,
+        type: 'list',
+        boardId: board._id,
+        title,
+        color: 'bg-slate-300',
+        createdAt: now,
+        updatedAt: now,
+      },
+    ]);
     const realList = await createListAction(
       {
         title,
@@ -304,7 +306,7 @@ export default function BoardClient({
 
       {/* Lists */}
       <section className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide">
-        {orderedLists.map((list) => (
+        {lists.map((list) => (
           <div key={list._id} className="shrink-0" style={{ width: 270 }}>
             <ListView
               list={list}

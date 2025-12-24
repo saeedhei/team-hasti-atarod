@@ -1,7 +1,6 @@
 //app/boards/[boardSlug]/actions.ts
 'use server';
 
-import { revalidatePath } from 'next/cache';
 import { randomUUID } from 'crypto';
 import { kanbansDB } from '@/lib/couchdb';
 import { createCardSchema } from '@/validations/card';
@@ -18,6 +17,7 @@ export async function createCardAction(
   boardSlug: string,
 ) {
   const data = createCardSchema.parse(payload);
+  const now = new Date().toISOString();
 
   const card: Card = {
     _id: `card:${randomUUID()}`,
@@ -27,11 +27,11 @@ export async function createCardAction(
     title: data.title,
     description: data.description,
     priority: data.priority,
-    position: data.position ?? 0,
-    createdAt: new Date().toISOString(),
     tags: data.tags,
     progress: data.progress,
     assignee: data.assignee,
+    createdAt: now,
+    updatedAt: now,
   };
   await kanbansDB.insert(card);
   return card;
@@ -41,19 +41,16 @@ export async function createCardAction(
 
 export async function createListAction(payload: unknown, boardId: string, boardSlug: string) {
   const data = createListSchema.parse(payload);
+  const now = new Date().toISOString();
 
-  // Fetch existing lists for this board to compute the next stable position.
-  const existing = await kanbansDB.find({
-    selector: { type: 'list', boardId },
-  });
-  const position = existing.docs.length;
   const list: List = {
     _id: `list:${randomUUID()}`,
     type: 'list',
     boardId,
     title: data.title,
-    position,
     color: data.color,
+    createdAt: now,
+    updatedAt: now,
   };
 
   await kanbansDB.insert(list);
