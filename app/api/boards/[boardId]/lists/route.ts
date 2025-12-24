@@ -21,7 +21,13 @@ export async function GET(_: Request, { params }: Params) {
       },
     });
 
-    return NextResponse.json({ lists: result.docs as List[] });
+    return NextResponse.json(
+      {
+        lists: result.docs as List[],
+        total: result.docs.length,
+      },
+      { status: 200 },
+    );
   } catch (err) {
     console.error('GET Lists Error:', err);
     return NextResponse.json({ error: 'Failed to fetch lists' }, { status: 500 });

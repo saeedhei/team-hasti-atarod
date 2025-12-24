@@ -24,7 +24,13 @@ export async function GET(_: Request, { params }: Params) {
       },
     });
 
-    return NextResponse.json({ cards: result.docs as Card[] });
+    return NextResponse.json(
+      {
+        cards: result.docs as Card[],
+        total: result.docs.length,
+      },
+      { status: 200 },
+    );
   } catch (err) {
     console.error('GET Cards Error:', err);
     return NextResponse.json({ error: 'Failed to fetch cards' }, { status: 500 });
