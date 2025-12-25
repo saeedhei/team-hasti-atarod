@@ -6,18 +6,18 @@ import { kanbansDB } from '@/lib/couchdb';
 import type { List } from '@/types/list';
 import { createListSchema } from '@/validations/list';
 
-interface Params {
-  params: { boardId: string };
+interface RouteContext {
+  params: Promise<{ boardId: string }>;
 }
-
 // ---------- GET ----------
 
-export async function GET(_: Request, { params }: Params) {
+export async function GET(_: Request, props: RouteContext) {
+  const { boardId } = await props.params;
   try {
     const result = await kanbansDB.find({
       selector: {
         type: 'list',
-        boardId: params.boardId,
+        boardId: boardId,
       },
     });
 
@@ -36,7 +36,8 @@ export async function GET(_: Request, { params }: Params) {
 
 // ---------- POST  ----------
 
-export async function POST(req: Request, { params }: Params) {
+export async function POST(req: Request, props: RouteContext) {
+  const { boardId } = await props.params;
   try {
     const body = await req.json();
     const parsed = createListSchema.safeParse(body);
@@ -48,7 +49,7 @@ export async function POST(req: Request, { params }: Params) {
     const list: List = {
       _id: `list:${crypto.randomUUID()}`,
       type: 'list',
-      boardId: params.boardId,
+      boardId: boardId,
       title: parsed.data.title,
       position: parsed.data.position ?? 0,
       color: parsed.data.color,
