@@ -12,4 +12,6 @@ export interface List extends MaybeDocument {
   title: string;
   position: number;
   color?: string;
+  createdAt: string;
+  updatedAt: string;
 }

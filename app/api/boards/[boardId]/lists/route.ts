@@ -46,6 +46,7 @@ export async function POST(req: Request, props: RouteContext) {
       return NextResponse.json({ errors: parsed.error.flatten() }, { status: 400 });
     }
 
+    const now = new Date().toISOString();
     const list: List = {
       _id: `list:${crypto.randomUUID()}`,
       type: 'list',
@@ -53,11 +54,13 @@ export async function POST(req: Request, props: RouteContext) {
       title: parsed.data.title,
       position: parsed.data.position ?? 0,
       color: parsed.data.color,
+      createdAt: now,
+      updatedAt: now,
     };
 
-    await kanbansDB.insert(list);
+    const result = await kanbansDB.insert(list);
 
-    return NextResponse.json({ message: 'List created' }, { status: 201 });
+    return NextResponse.json({ message: 'List created', id: result.id }, { status: 201 });
   } catch (err) {
     console.error('POST List Error:', err);
     return NextResponse.json({ error: 'Failed to create list' }, { status: 500 });

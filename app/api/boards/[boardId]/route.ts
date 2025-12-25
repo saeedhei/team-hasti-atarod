@@ -70,6 +70,7 @@ export async function PUT(req: Request, props: RouteContext) {
     const updated: Board = {
       ...existing,
       ...parsed.data,
+      updatedAt: new Date().toISOString(),
     };
 
     const result = await kanbansDB.insert(updated);

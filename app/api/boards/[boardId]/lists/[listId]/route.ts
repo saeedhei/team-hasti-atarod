@@ -83,6 +83,7 @@ export async function PUT(req: Request, props: RouteContext) {
     const updated: List = {
       ...existing,
       ...parsed.data,
+      updatedAt: new Date().toISOString(),
     };
     const result = await kanbansDB.insert(updated);
     return NextResponse.json({
