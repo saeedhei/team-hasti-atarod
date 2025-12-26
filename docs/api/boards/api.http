@@ -1,2 +1,29 @@
 # Install the REST Client plugin for VSCode to use this file.
 GET http://localhost:3000/api/boards
+
+###
+### create a new board
+POST http://localhost:3000/api/boards
+
+
+{
+  "title": "My Test Board",
+  "description": "Created via REST Client"
+
+}
+
+###
+
+### Update board
+PUT http://localhost:3000/api/boards/board:PASTE_CREATED_ID_HERE 
+
+
+{
+  "title": "Updated Board Title"
+}
+
+###
+
+### Delete board
+DELETE http://localhost:3000/api/boards/board:PASTE_CREATED_ID_HERE
+

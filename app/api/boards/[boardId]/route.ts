@@ -7,8 +7,8 @@ import type { Board } from '@/types/board';
 import { updateBoardSchema } from '@/validations/board';
 
 // ---------- Types ----------
-interface Params {
-  params: { boardId: string };
+interface RouteContext {
+  params: Promise<{ boardId: string }>;
 }
 
 interface NanoError {
@@ -44,9 +44,10 @@ function getMessage(err: unknown): string {
 }
 
 // ---------- GET /api/boards/[boardId] ----------
-export async function GET(_: Request, { params }: Params) {
+export async function GET(_: Request, props: RouteContext) {
+  const { boardId } = await props.params;
   try {
-    const board = (await kanbansDB.get(params.boardId)) as Board;
+    const board = (await kanbansDB.get(boardId)) as Board;
     return NextResponse.json({ board });
   } catch (error: unknown) {
     return NextResponse.json({ error: getMessage(error) }, { status: getStatus(error) });
@@ -54,7 +55,8 @@ export async function GET(_: Request, { params }: Params) {
 }
 
 // ---------- PUT /api/boards/[boardId] ----------
-export async function PUT(req: Request, { params }: Params) {
+export async function PUT(req: Request, props: RouteContext) {
+  const { boardId } = await props.params;
   try {
     const body = await req.json();
     const parsed = updateBoardSchema.safeParse(body);
@@ -63,11 +65,12 @@ export async function PUT(req: Request, { params }: Params) {
       return NextResponse.json({ errors: parsed.error.flatten() }, { status: 400 });
     }
 
-    const existing = (await kanbansDB.get(params.boardId)) as Board;
+    const existing = (await kanbansDB.get(boardId)) as Board;
 
     const updated: Board = {
       ...existing,
       ...parsed.data,
+      updatedAt: new Date().toISOString(),
     };
 
     const result = await kanbansDB.insert(updated);
@@ -82,9 +85,10 @@ export async function PUT(req: Request, { params }: Params) {
 }
 
 // ---------- DELETE /api/boards/[boardId] ----------
-export async function DELETE(_: Request, { params }: Params) {
+export async function DELETE(_: Request, props: RouteContext) {
+  const { boardId } = await props.params;
   try {
-    const existing = (await kanbansDB.get(params.boardId)) as Board;
+    const existing = (await kanbansDB.get(boardId)) as Board;
 
     const result = await kanbansDB.destroy(existing._id, existing._rev!);
 

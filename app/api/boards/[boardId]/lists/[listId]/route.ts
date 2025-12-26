@@ -7,11 +7,11 @@ import type { List } from '@/types/list';
 import { updateListSchema } from '@/validations/list';
 
 // ---------- Types ----------
-interface Params {
-  params: {
+interface RouteContext {
+  params: Promise<{
     boardId: string;
     listId: string;
-  };
+  }>;
 }
 
 interface NanoError {
@@ -47,11 +47,13 @@ function getMessage(err: unknown): string {
 }
 
 // ---------- GET ----------
-export async function GET(_: Request, { params }: Params) {
+export async function GET(_: Request, props: RouteContext) {
+  const { boardId, listId } = await props.params;
+
   try {
-    const list = (await kanbansDB.get(params.listId)) as List;
+    const list = (await kanbansDB.get(listId)) as List;
     // The list belongs to the board in the URL
-    if (list.boardId !== params.boardId) {
+    if (list.boardId !== boardId) {
       return NextResponse.json({ error: 'List does not belong to this board' }, { status: 404 });
     }
     return NextResponse.json({ list });
@@ -61,7 +63,9 @@ export async function GET(_: Request, { params }: Params) {
 }
 
 // ---------- PUT ----------
-export async function PUT(req: Request, { params }: Params) {
+export async function PUT(req: Request, props: RouteContext) {
+  const { boardId, listId } = await props.params;
+
   try {
     const body = await req.json();
     const parsed = updateListSchema.safeParse(body);
@@ -70,15 +74,16 @@ export async function PUT(req: Request, { params }: Params) {
       return NextResponse.json({ errors: parsed.error.flatten() }, { status: 400 });
     }
 
-    const existing = (await kanbansDB.get(params.listId)) as List;
+    const existing = (await kanbansDB.get(listId)) as List;
     //  Enforce board scope
-    if (existing.boardId !== params.boardId) {
+    if (existing.boardId !== boardId) {
       return NextResponse.json({ error: 'List does not belong to this board' }, { status: 404 });
     }
 
     const updated: List = {
       ...existing,
       ...parsed.data,
+      updatedAt: new Date().toISOString(),
     };
     const result = await kanbansDB.insert(updated);
     return NextResponse.json({
@@ -91,12 +96,14 @@ export async function PUT(req: Request, { params }: Params) {
 }
 
 // ---------- DELETE ----------
-export async function DELETE(_: Request, { params }: Params) {
+export async function DELETE(_: Request, props: RouteContext) {
+  const { boardId, listId } = await props.params;
+
   try {
-    const existing = (await kanbansDB.get(params.listId)) as List;
+    const existing = (await kanbansDB.get(listId)) as List;
 
     // Enforce board scope
-    if (existing.boardId !== params.boardId) {
+    if (existing.boardId !== boardId) {
       return NextResponse.json({ error: 'List does not belong to this board' }, { status: 404 });
     }
 

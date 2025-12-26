@@ -1,0 +1,25 @@
+@baseUrl = http://localhost:3000
+@boardId = board:123
+@listId = list:e17ba35b-13e2-4eca-8a41-b1a1f2bf59d8
+
+
+### Get lists for a board
+GET {{baseUrl}}/api/boards/{{boardId}}/lists
+
+### Create list
+POST {{baseUrl}}/api/boards/{{boardId}}/lists
+
+{
+  "title": "Todo"
+}
+
+### Update list
+PUT {{baseUrl}}/api/boards/{{boardId}}/lists/{{listId}}
+
+{
+  "title": "In Progress",
+  "color": "#ffcc00"
+}
+
+### Delete list
+DELETE {{baseUrl}}/api/boards/{{boardId}}/lists/{{listId}}

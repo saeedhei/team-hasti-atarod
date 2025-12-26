@@ -7,12 +7,12 @@ import type { Card } from '@/types/card';
 import { updateCardSchema } from '@/validations/card';
 
 // ---------- Types ----------
-interface Params {
-  params: {
+interface RouteContext {
+  params: Promise<{
     boardId: string;
     listId: string;
     cardId: string;
-  };
+  }>;
 }
 
 interface NanoError {
@@ -48,12 +48,13 @@ function getMessage(err: unknown): string {
 }
 
 // ---------- GET ----------
-export async function GET(_: Request, { params }: Params) {
+export async function GET(_: Request, props: RouteContext) {
+  const { boardId, listId, cardId } = await props.params;
   try {
-    const card = (await kanbansDB.get(params.cardId)) as Card;
+    const card = (await kanbansDB.get(cardId)) as Card;
 
     // Enforce board + list scope
-    if (card.boardId !== params.boardId || card.listId !== params.listId) {
+    if (card.boardId !== boardId || card.listId !== listId) {
       return NextResponse.json(
         { error: 'Card does not belong to this list or board' },
         { status: 404 },
@@ -66,7 +67,8 @@ export async function GET(_: Request, { params }: Params) {
 }
 
 // ---------- PUT ----------
-export async function PUT(req: Request, { params }: Params) {
+export async function PUT(req: Request, props: RouteContext) {
+  const { boardId, listId, cardId } = await props.params;
   try {
     const body = await req.json();
     const parsed = updateCardSchema.safeParse(body);
@@ -75,10 +77,10 @@ export async function PUT(req: Request, { params }: Params) {
       return NextResponse.json({ errors: parsed.error.flatten() }, { status: 400 });
     }
 
-    const existing = (await kanbansDB.get(params.cardId)) as Card;
+    const existing = (await kanbansDB.get(cardId)) as Card;
 
     // Enforce board + list scope
-    if (existing.boardId !== params.boardId || existing.listId !== params.listId) {
+    if (existing.boardId !== boardId || existing.listId !== listId) {
       return NextResponse.json(
         { error: 'Card does not belong to this list or board' },
         { status: 404 },
@@ -102,11 +104,12 @@ export async function PUT(req: Request, { params }: Params) {
 }
 
 // ---------- DELETE ----------
-export async function DELETE(_: Request, { params }: Params) {
+export async function DELETE(_: Request, props: RouteContext) {
+  const { boardId, listId, cardId } = await props.params;
   try {
-    const existing = (await kanbansDB.get(params.cardId)) as Card;
+    const existing = (await kanbansDB.get(cardId)) as Card;
     // Enforce board + list scope
-    if (existing.boardId !== params.boardId || existing.listId !== params.listId) {
+    if (existing.boardId !== boardId || existing.listId !== listId) {
       return NextResponse.json(
         { error: 'Card does not belong to this list or board' },
         { status: 404 },

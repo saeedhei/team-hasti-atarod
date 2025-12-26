@@ -37,6 +37,7 @@ export async function POST(req: Request) {
 
     const { title, description } = parsed.data;
     const slug = generateSlug(title);
+    const now = new Date().toISOString();
 
     const board: Board = {
       _id: `board:${randomUUID()}`,
@@ -44,6 +45,8 @@ export async function POST(req: Request) {
       title,
       slug,
       description,
+      createdAt: now,
+      updatedAt: now,
     };
 
     const result = await kanbansDB.insert(board);
