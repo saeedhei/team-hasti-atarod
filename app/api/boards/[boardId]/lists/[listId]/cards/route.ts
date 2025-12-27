@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server';
 import { kanbansDB } from '@/lib/couchdb';
 import type { Card } from '@/types/card';
 import { createCardSchema } from '@/validations/card';
+import { randomUUID } from 'crypto';
 
 interface RouteContext {
   params: Promise<{
@@ -51,21 +52,23 @@ export async function POST(req: Request, props: RouteContext) {
       return NextResponse.json({ errors: parsed.error.flatten() }, { status: 400 });
     }
 
+    const now = new Date().toISOString();
     const card: Card = {
-      _id: `card:${crypto.randomUUID()}`,
+      _id: `card:${randomUUID()}`,
       type: 'card',
       boardId: boardId,
       listId: listId,
       title: parsed.data.title,
       description: parsed.data.description,
       priority: parsed.data.priority,
-      position: parsed.data.position ?? 0,
-      createdAt: new Date().toISOString(),
+      //ordering via DB
+      createdAt: now,
+      updatedAt: now,
     };
 
-    await kanbansDB.insert(card);
+    const result = await kanbansDB.insert(card);
 
-    return NextResponse.json({ message: 'Card created' }, { status: 201 });
+    return NextResponse.json({ message: 'Card created', id: result.id }, { status: 201 });
   } catch (err) {
     console.error('POST Card Error:', err);
     return NextResponse.json({ error: 'Failed to create card' }, { status: 500 });

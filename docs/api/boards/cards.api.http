@@ -1,0 +1,26 @@
+@baseUrl= http://localhost:3000
+@boardId = board:bf4d1104-14b2-4ae2-8d11-74abca7d0422
+@listId = list:bdf46a5f-1bfa-49be-b7d3-9d9bc1a8e043
+@cardId = card:fecfa229-4dc6-4b6a-a68b-b95b916872bb
+
+### Get cards for list and board 
+GET {{baseUrl}}/api/boards/{{boardId}}/lists/{{listId}}/cards
+
+### create card 
+POST {{baseUrl}}/api/boards/{{boardId}}/lists/{{listId}}/cards
+
+{
+ "title" : "test",
+ "description" : "api test"
+}
+
+### update card 
+PUT {{baseUrl}}/api/boards/{{boardId}}/lists/{{listId}}/cards/{{cardId}}
+
+{
+    "title":"update test",
+    "description":"its working"
+}
+
+### delete card
+DELETE {{baseUrl}}/api/boards/{{boardId}}/lists/{{listId}}/cards/{{cardId}}

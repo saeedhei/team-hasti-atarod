@@ -1,6 +1,6 @@
 @baseUrl = http://localhost:3000
-@boardId = board:123
-@listId = list:e17ba35b-13e2-4eca-8a41-b1a1f2bf59d8
+@boardId = board:bf4d1104-14b2-4ae2-8d11-74abca7d0422
+@listId = list:bdf46a5f-1bfa-49be-b7d3-9d9bc1a8e043
 
 
 ### Get lists for a board

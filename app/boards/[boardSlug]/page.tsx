@@ -28,9 +28,11 @@ export default async function BoardPage({ params }: PageProps) {
   const [listResult, cardResult] = await Promise.all([
     kanbansDB.find({
       selector: { type: 'list', boardId: board._id },
+      //sort: [{ createdAt: 'asc' }],
     }),
     kanbansDB.find({
       selector: { type: 'card', boardId: board._id },
+      //sort: [{ createdAt: 'asc' }],
     }),
   ]);
 

@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { revalidatePath } from 'next/cache';
 import { kanbansDB } from '@/lib/couchdb';
 import { generateSlug } from '@/lib/slug';
-import { randomUUID } from 'crypto';
 import type { Board } from '@/types/board';
 import { createBoardSchema } from '@/validations/board';
 
@@ -36,12 +35,15 @@ async function createBoard(formData: FormData) {
         ? rawData.description.trim()
         : undefined,
   });
+  const now = new Date().toISOString();
   const board: Board = {
-    _id: `board:${randomUUID()}`,
+    _id: `board:${crypto.randomUUID()}`,
     type: 'board',
     title: data.title.trim(),
     slug: generateSlug(data.title),
     description: data.description,
+    createdAt: now,
+    updatedAt: now,
   };
 
   await kanbansDB.insert(board);
@@ -66,7 +68,10 @@ export default async function BoardsPage() {
   let boards: Board[] = [];
 
   try {
-    const result = await kanbansDB.find({ selector: { type: 'board' } });
+    const result = await kanbansDB.find({
+      selector: { type: 'board' },
+      //sort: [{ createdAt: 'asc' }],
+    });
 
     boards = result.docs as Board[];
   } catch (err) {

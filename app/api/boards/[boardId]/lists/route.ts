@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server';
 import { kanbansDB } from '@/lib/couchdb';
 import type { List } from '@/types/list';
 import { createListSchema } from '@/validations/list';
+import { randomUUID } from 'crypto';
 
 interface RouteContext {
   params: Promise<{ boardId: string }>;
@@ -48,12 +49,13 @@ export async function POST(req: Request, props: RouteContext) {
 
     const now = new Date().toISOString();
     const list: List = {
-      _id: `list:${crypto.randomUUID()}`,
+      _id: `list:${randomUUID()}`,
       type: 'list',
       boardId: boardId,
       title: parsed.data.title,
-      position: parsed.data.position ?? 0,
       color: parsed.data.color,
+
+      //ordering via DB
       createdAt: now,
       updatedAt: now,
     };
